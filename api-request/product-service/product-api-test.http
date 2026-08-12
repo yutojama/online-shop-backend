@@ -1,0 +1,18 @@
+### Post request
+POST http://localhost:4000/products
+Content-Type: application/json
+
+{
+  "brand": "burton",
+  "category": "top",
+  "gender": "M",
+  "description": "Burton AK Gore-Tex 2L Swash Jacket Black Snowwear",
+  "amountRemain": 8,
+  "daysOfDelivery": 5,
+  "origPrice": 499,
+  "discountPrice": 399,
+  "image": "C:/Softwares/projects/online-shop-frontend/public/images/prod_001.jpg"
+}
+
+### GET request
+GET http://localhost:4000/products/678bd391-98e7-4681-89f8-e537a77cb94c

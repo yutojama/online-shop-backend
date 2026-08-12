@@ -1,0 +1,5 @@
+### Delete product by id
+DELETE http://localhost:4000/products/a1329477-ad54-4ec3-a055-4ebc18c386cf
+
+### Delete all products
+DELETE http://localhost:4000/products/delete-all
