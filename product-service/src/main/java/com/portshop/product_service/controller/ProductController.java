@@ -6,8 +6,6 @@ import com.portshop.product_service.dto.ProductResponseDTO;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.ProductService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +16,6 @@ import java.util.UUID;
 @RequestMapping("/products")
 public class ProductController {
 
-    private final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
     private final ProductMapper productMapper;
 
@@ -30,7 +27,6 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO){
         Product newProduct = productService.createProduct(productMapper.ProductRequestDTOToProduct(productRequestDTO));
-        log.debug("REST request to save Product : {}", newProduct);
         ProductResponseDTO productResponseDTO = productMapper.ProductToProductResponseDTO(newProduct);
         return ResponseEntity.ok().body(productResponseDTO);
     }

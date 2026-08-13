@@ -31,6 +31,14 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<?> handleItemNotFoundException(ItemNotFoundException e){
+        logger.warn("Item not found {}", e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("item", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
         logger.warn(e.getMessage());

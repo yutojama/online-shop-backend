@@ -27,7 +27,7 @@ public class ProductRequestDTO {
     @NotBlank(message = "Description is required")
     private String description;
 
-    private Integer amountRemain;
+    private Integer quantity;
     private Integer daysOfDelivery;
 
     @NotNull(message = "Price is required")

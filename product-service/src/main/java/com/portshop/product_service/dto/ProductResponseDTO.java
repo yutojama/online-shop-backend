@@ -18,7 +18,7 @@ public class ProductResponseDTO {
     private String category;
     private String gender;
     private String description;
-    private Integer amountRemain;
+    private Integer quantity;
     private Integer daysOfDelivery;
     private Integer origPrice;
     private Integer discountPrice;

@@ -1,0 +1,11 @@
+### Add new item
+POST http://localhost:4000/items
+Content-Type: application/json
+
+{
+  "productId": "592e1e21-34e7-486d-886c-9cf316c19a0c",
+  "quantity": 2,
+  "size": "M"
+}
+
+###
