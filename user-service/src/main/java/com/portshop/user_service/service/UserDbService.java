@@ -34,16 +34,18 @@ public class UserDbService {
         return savedApiUser.getId().toString();
     }
 
-    public void updateUserRole(String userId, Role role) {
+    // return keycloak id
+    public String updateUserRole(String userId, Role role) {
         Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
         if(apiUser.isPresent()) {
             apiUser.get().setRole(role);
-            userRepository.save(apiUser.get());
+            return userRepository.save(apiUser.get()).getKeycloakUserId();
         }else {
             throw new ApiUserNotFoundException("User not found: "+userId);
         }
     }
 
+    // return keycloak id
     public String getKeycloakUserId(String userId) {
         Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
         if(apiUser.isPresent()) {
@@ -53,8 +55,32 @@ public class UserDbService {
         }
     }
 
+    public Role getRole(String userId) {
+        Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
+        if(apiUser.isPresent()) {
+            return apiUser.get().getRole();
+        }else{
+            throw new ApiUserNotFoundException("User not found: "+userId);
+        }
+    }
+
     public ApiUser saveApiUser(ApiUser apiUser) {
         return userRepository.save(apiUser);
     }
 
+    // return keycloak id
+    public String deleteUser(String userId) {
+        Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
+        if(apiUser.isPresent()) {
+            ApiUser user = apiUser.get();
+            userRepository.delete(user);
+            return user.getKeycloakUserId();
+        }else{
+            throw new ApiUserNotFoundException("Delete failed. User not found: "+userId);
+        }
+    }
+
+    public void deleteAllUsers() {
+        userRepository.deleteAll();
+    }
 }

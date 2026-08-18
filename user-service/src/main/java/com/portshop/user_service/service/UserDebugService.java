@@ -18,7 +18,8 @@ public class UserDebugService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final Keycloak kc;
-    private final UserRepository userRepository;
+    private final UserKeycloakService userKeycloakService;
+    private final UserDbService userDbService;
 
     @Value("${keycloak.client-id}")
     private String clientId;
@@ -26,9 +27,10 @@ public class UserDebugService {
     @Value("${keycloak.realm}")
     private String realm;
 
-    public UserDebugService(Keycloak kc, UserRepository userRepository) {
+    public UserDebugService(Keycloak kc, UserKeycloakService userKeycloakService, UserDbService userDbService) {
         this.kc = kc;
-        this.userRepository = userRepository;
+        this.userKeycloakService = userKeycloakService;
+        this.userDbService = userDbService;
     }
 
     public Map<String, String> getKeycloakClientInfo() {
@@ -66,6 +68,7 @@ public class UserDebugService {
     }
 
     public void deleteAllUsers() {
-        userRepository.deleteAll();
+        userDbService.deleteAllUsers();
+        userKeycloakService.deleteAllKeycloakUsers();
     }
 }

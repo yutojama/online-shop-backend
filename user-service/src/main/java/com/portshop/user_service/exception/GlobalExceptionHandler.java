@@ -28,4 +28,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(KeycloakDeleteFailedException.class)
+    public ResponseEntity<?> handleKeycloakDeleteFailedException(KeycloakDeleteFailedException e){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error ", "Could not delete Keycloak user: " + e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }

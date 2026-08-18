@@ -1,6 +1,5 @@
 package com.portshop.user_service.controller;
 
-import com.portshop.user_service.service.UserDbService;
 import com.portshop.user_service.service.UserDebugService;
 import com.portshop.user_service.service.UserService;
 import com.portshop.user_service.userEnum.Role;
@@ -11,20 +10,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
-public class CustomerController {
+public class UserController {
 
     private final UserService userService;
     private final UserDebugService userDebugService;
 
-    public CustomerController(UserService userService, UserDebugService userDebugService1) {
+    public UserController(UserService userService, UserDebugService userDebugService1) {
         this.userService = userService;
         this.userDebugService = userDebugService1;
     }
 
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
-        userService.createUser(userRequestDTO, Role.CUSTOMER);
-        return ResponseEntity.ok().body("Customer created successfully: ");
+        String userId = userService.createUser(userRequestDTO, Role.CUSTOMER);
+        return ResponseEntity.ok().body("Customer created successfully: "+userId);
     }
 
     @PostMapping("/{userId}/role/{role}")
@@ -38,6 +37,12 @@ public class CustomerController {
     @GetMapping("/debug-keycloak")
     public ResponseEntity<?> getKeycloakClientInfo() {
         return  ResponseEntity.ok().body(userDebugService.getKeycloakClientInfo());
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().body("User deleted successfully: "+userId);
     }
 
     @DeleteMapping("/reset-all")

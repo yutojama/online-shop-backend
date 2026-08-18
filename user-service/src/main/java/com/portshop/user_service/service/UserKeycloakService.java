@@ -2,6 +2,7 @@ package com.portshop.user_service.service;
 
 import com.portshop.user_service.dto.UserRequestDTO;
 import com.portshop.user_service.exception.KeycloakCreateUserException;
+import com.portshop.user_service.exception.KeycloakDeleteFailedException;
 import com.portshop.user_service.userEnum.Role;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
@@ -51,17 +52,19 @@ public class UserKeycloakService {
 
         user.setCredentials(List.of(credential));
 
-        Response response = kc
+        String location;
+        try (Response response = kc
                 .realm(realm)
                 .users()
-                .create(user);
+                .create(user)) {
 
-        if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-            throw new KeycloakCreateUserException(String.valueOf(response.getStatus()));
+            if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+                throw new KeycloakCreateUserException(String.valueOf(response.getStatus()));
+            }
+
+            // Location header contains the newly created user's URL
+            location = response.getLocation().toString();
         }
-
-        // Location header contains the newly created user's URL
-        String location = response.getLocation().toString();
 
         return location.substring(location.lastIndexOf("/") + 1);
     }
@@ -106,7 +109,22 @@ public class UserKeycloakService {
     }
 
     public void deleteKeycloakUser(String keycloakUserId) {
+        try (Response deleteResponse = kc
+                .realm(realm)
+                .users()
+                .delete(keycloakUserId)) {
+            if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+                throw new KeycloakDeleteFailedException(String.valueOf(deleteResponse.getStatus()));
+            }
+        }
+    }
 
+    public void deleteAllKeycloakUsers() {
+        List<UserRepresentation> users = kc
+                .realm(realm)
+                .users()
+                .list();
+        users.forEach(user -> deleteKeycloakUser(user.getId()));
     }
 
 }

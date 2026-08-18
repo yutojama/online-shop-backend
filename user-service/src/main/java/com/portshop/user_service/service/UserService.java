@@ -37,14 +37,40 @@ public class UserService {
 
     public String createUser(UserRequestDTO userRequestDTO, Role role) {
         String kcId = userKeycloakService.createKeycloakUser(userRequestDTO);
-        userKeycloakService.updateUserRole(kcId, role);
-        return userDbService.createUser(kcId,role,userRequestDTO);
+
+        // try adding role
+        try{
+            userKeycloakService.updateUserRole(kcId, role);
+        }catch (Exception e){
+            userKeycloakService.deleteKeycloakUser(kcId);
+        }
+
+        // try creating db user
+        String userId = null;
+        try{
+            userId = userDbService.createUser(kcId,role,userRequestDTO);
+        }catch (Exception e){
+            userKeycloakService.deleteKeycloakUser(kcId);
+        }
+
+        return userId;
     }
 
     public void updateUserRole(String userId, Role role) {
-        String kcId = userDbService.getKeycloakUserId(userId);
-        userDbService.updateUserRole(kcId,role);
-        userKeycloakService.updateUserRole(kcId, role);
+        Role preRole = userDbService.getRole(userId);
+        String kcId = userDbService.updateUserRole(userId,role);
+
+        // try updating role
+        try{
+            userKeycloakService.updateUserRole(kcId, role);
+        }catch (Exception e){
+            userDbService.updateUserRole(kcId,preRole);
+        }
+    }
+
+    public void deleteUser(String userId) {
+        String kcId = userDbService.deleteUser(userId);
+        userKeycloakService.deleteKeycloakUser(kcId);
     }
 
 }
