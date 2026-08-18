@@ -1,4 +1,9 @@
-### GET request
+### GET request gateway
 GET http://localhost:4000/api/products/4c1c0756-898d-4104-a57d-352dcdd4c47e
+
+###
+
+### GET request service
+GET http://localhost:4001/products/4c1c0756-898d-4104-a57d-352dcdd4c47e
 
 ###
