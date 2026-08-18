@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: user-service
+
+server:
+  port: 4002
+
+logging:
+  level:
+    root: info

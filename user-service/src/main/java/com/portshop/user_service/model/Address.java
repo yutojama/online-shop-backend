@@ -1,0 +1,51 @@
+package com.portshop.user_service.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class Address {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String street;
+
+    @Column(nullable = false)
+    private String city;
+
+    @Column(nullable = false)
+    private String postalCode;
+
+    @Column(nullable = false)
+    private String country;
+
+    @Column(nullable = false)
+    private boolean isDefault;
+
+    @ManyToOne
+    @JsonBackReference
+    @JoinColumn(
+            name = "user_id",
+            nullable = false
+    )
+    ApiUser user;
+}
