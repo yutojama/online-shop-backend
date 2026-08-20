@@ -59,7 +59,7 @@ public class UserKeycloakService {
                 .create(user)) {
 
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-                throw new KeycloakCreateUserException(String.valueOf(response.getStatus()));
+                throw new KeycloakCreateUserException("Could not create Keycloak user: " + String.valueOf(response.getStatus()));
             }
 
             // Location header contains the newly created user's URL
@@ -114,17 +114,24 @@ public class UserKeycloakService {
                 .users()
                 .delete(keycloakUserId)) {
             if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-                throw new KeycloakDeleteFailedException(String.valueOf(deleteResponse.getStatus()));
+                throw new KeycloakDeleteFailedException("Could not delete Keycloak user: " + String.valueOf(deleteResponse.getStatus()));
             }
         }
     }
 
     public void deleteAllKeycloakUsers() {
-        List<UserRepresentation> users = kc
-                .realm(realm)
-                .users()
-                .list();
-        users.forEach(user -> deleteKeycloakUser(user.getId()));
+        // keycloak users are paginated, so delete in batch
+        int batchSize = 100;
+
+        while (true){
+            List<UserRepresentation> users = kc
+                    .realm(realm)
+                    .users()
+                    .list();
+            if(users.isEmpty()){ break;}
+            users.forEach(user -> deleteKeycloakUser(user.getId()));
+        }
+
     }
 
 }

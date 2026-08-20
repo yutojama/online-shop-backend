@@ -3,6 +3,7 @@ package com.portshop.product_service.controller;
 import com.portshop.product_service.dto.ItemImportRequestDTO;
 import com.portshop.product_service.dto.ItemMapper;
 import com.portshop.product_service.dto.ItemRequestDTO;
+import com.portshop.product_service.dto.ItemResponseDTO;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.ItemService;
@@ -31,7 +32,8 @@ public class ItemController {
         this.productService = productService;
     }
 
-    @PostMapping
+    // deprecated, will be deleted later
+    @PostMapping("/add-item")
     public ResponseEntity<?> addItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
         Item item = Item.builder()
                 .quantity(itemRequestDTO.getQuantity())
@@ -53,6 +55,13 @@ public class ItemController {
         ).toList();
         itemService.addItems(items);
         return ResponseEntity.ok().body("Add items successfully");
+    }
+
+    @GetMapping("/get-item/{itemId}")
+    public ResponseEntity<?> getItem(@PathVariable String itemId){
+        Item item = itemService.getItem(UUID.fromString(itemId));
+        ItemResponseDTO itemResponseDTO = itemMapper.toItemResponseDTO(item);
+        return  ResponseEntity.ok().body(itemResponseDTO);
     }
 
     @PostMapping("/import-data")

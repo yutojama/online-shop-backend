@@ -1,0 +1,76 @@
+### Login admin
+POST http://localhost:4000/api/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+    console.log("access token saved: ", client.global.get("access_token"))
+    console.log("refresh token saved: ", client.global.get("refresh_token"))
+%}
+
+### Login user
+POST http://localhost:4000/api/users/login
+Content-Type: application/json
+
+{
+  "username": "jamielynn",
+  "password": "password"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+    console.log("access token saved: ", client.global.get("access_token"));
+    console.log("refresh token saved: ", client.global.get("refresh_token"));
+%}
+
+### Logout user
+POST http://localhost:4000/api/users/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token}}"
+}
+
+> {%
+    client.global.set("access_token", "");
+    console.log("access token deleted");
+%}
+
+### Register/add user
+POST http://localhost:4000/api/users/register
+Content-Type: application/json
+
+{
+  "email": "jamielynn@yahoo.com",
+  "password": "password",
+  "firstName": "Jamie",
+  "lastName": "Lynn",
+  "phone": "0157595248586"
+}
+
+
+
+### Update user role
+POST http://localhost:4000/api/users/9dbedb62-e2c8-4f28-b63e-7e2a0e250aaa/role/CUSTOMER
+Authorization: Bearer {{access_token}}
+
+### Delete specific user
+DELETE http://localhost:4000/api/users/delete-user/c4cb7f15-5856-496c-b72e-983a828c99f4
+Authorization: Bearer {{access_token}}
+
+
+
+### Data agent
+GET http://localhost:4000/api/admin/generate-data/10
+Authorization: Bearer {{access_token}}
+
+### Delete users
+DELETE http://localhost:4000/api/admin/reset-all
+Authorization: Bearer {{access_token}}

@@ -1,0 +1,5 @@
+### Add data
+GET http://localhost:4002/admin/generate-data/10
+
+### Delete users
+DELETE http://localhost:4002/admin/reset-all

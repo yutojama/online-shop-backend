@@ -7,6 +7,7 @@ import com.portshop.user_service.repository.UserRepository;
 import com.portshop.user_service.userEnum.Role;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,11 +56,24 @@ public class UserDbService {
         }
     }
 
+    public List<ApiUser> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public Role getRole(String userId) {
         Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
         if(apiUser.isPresent()) {
             return apiUser.get().getRole();
         }else{
+            throw new ApiUserNotFoundException("User not found: "+userId);
+        }
+    }
+
+    public ApiUser getApiUser(String userId) {
+        Optional<ApiUser> apiUser = userRepository.getApiUserById(UUID.fromString(userId));
+        if(apiUser.isPresent()) {
+            return apiUser.get();
+        }else {
             throw new ApiUserNotFoundException("User not found: "+userId);
         }
     }

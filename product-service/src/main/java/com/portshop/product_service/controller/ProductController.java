@@ -24,7 +24,8 @@ public class ProductController {
         this.productMapper = productMapper;
     }
 
-    @PostMapping
+    // deprecated, will be deleted
+    @PostMapping("/create-prod")
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO){
         Product newProduct = productService.createProduct(productMapper.ProductRequestDTOToProduct(productRequestDTO));
         ProductResponseDTO productResponseDTO = productMapper.ProductToProductResponseDTO(newProduct);
@@ -39,14 +40,14 @@ public class ProductController {
         return ResponseEntity.ok().body("Create successful");
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get-prod/{id}")
     public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable String id){
         Product product = productService.getProductById(UUID.fromString(id));
         ProductResponseDTO productResponseDTO = productMapper.ProductToProductResponseDTO(product);
         return ResponseEntity.ok().body(productResponseDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-prod/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable String id){
         productService.deleteProductById(UUID.fromString(id));
         return ResponseEntity.ok().body("Delete successful");

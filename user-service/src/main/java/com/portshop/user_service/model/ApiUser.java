@@ -53,6 +53,7 @@ public class ApiUser {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
@@ -60,5 +61,15 @@ public class ApiUser {
     )
     @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
+
+    public void addAddress(Address address){
+        address.setUser(this);
+        this.addresses.add(address);
+    }
+
+    public void removeAddress(Address address){
+        address.setUser(null);
+        this.addresses.remove(address);
+    }
 
 }

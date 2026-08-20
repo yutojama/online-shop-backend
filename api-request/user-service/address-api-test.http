@@ -1,0 +1,19 @@
+### Add address
+POST http://localhost:4002/addresses
+Content-Type: application/json
+
+{
+  "userId": "d1de516f-f079-4ce0-9f70-9964e2441e1f",
+  "firstName": "Jamie",
+  "lastName": "Lynn",
+  "street": "Eich Street",
+  "city": "Estenburg",
+  "postalCode": "95575",
+  "country": "Germany"
+}
+
+### Get user addresses by user id
+GET http://localhost:4002/addresses/get-user-address/d1de516f-f079-4ce0-9f70-9964e2441e1f
+
+### Delete address
+DELETE http://localhost:4002/addresses/aac04e57-a075-47f1-a19c-06a5fac4917b

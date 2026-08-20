@@ -1,2 +1,2 @@
 DROP TABLE address;
-DROP TABLE customer;
+DROP TABLE api_user;

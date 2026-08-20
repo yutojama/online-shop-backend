@@ -1,27 +1,55 @@
 package com.portshop.api_gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${keycloak.realm}")
+    private String realm;
 
     @Bean
     SecurityFilterChain keycloakSecurityFilterChain(HttpSecurity http) {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
+                        .requestMatchers("/api/users/register").permitAll()
+                        .requestMatchers("/api/users/login").permitAll()
+                        .requestMatchers("/api/users/logout").permitAll()
+                        .requestMatchers("/api/users/*/role/*").hasRole("ADMIN")
+                        .requestMatchers("/api/users/delete-user/*").hasRole("ADMIN")
+
+                        .requestMatchers("/api/users/create-prod").hasAnyRole("ADMIN","SHOP")
+                        .requestMatchers("/api/users/create-prods").hasAnyRole("ADMIN","SHOP")
+                        .requestMatchers("/api/users/delete-prod/*").hasAnyRole("ADMIN","SHOP")
+                        .requestMatchers("/api/users/delete-all").hasAnyRole("ADMIN")
+
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         .anyRequest()
                         .authenticated()
                 )
                 .oauth2ResourceServer(oauth2->
-                        oauth2.jwt(Customizer.withDefaults())
+                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationTokenConverter()))
                 )
                 .sessionManagement(session->session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -31,5 +59,26 @@ public class SecurityConfig {
                 .cors(cors->cors.disable())
                 .csrf(csrf -> csrf.disable());
         return http.build();
+    }
+
+    // this bean adds ROLE_ in front of all custom roles, because spring security need this prefix and otherwise invalid
+    @Bean
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationTokenConverter() {
+        return jwt -> {
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess != null) {
+                Map<String, Object> client =  (Map<String, Object>) resourceAccess.get(realm);
+
+                if (client != null) {
+                    Collection<String> roles = (Collection<String>) client.get("roles");
+
+                    if (roles != null) {
+                        roles.forEach(role -> grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                    }
+                }
+            }
+            return new JwtAuthenticationToken(jwt, grantedAuthorities);
+        };
     }
 }

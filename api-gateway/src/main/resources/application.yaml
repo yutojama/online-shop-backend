@@ -9,7 +9,14 @@ spring:
             - id: product-service
               uri: http://localhost:4001
               predicates:
-                - Path=/api/products/**
+                - Path=/api/products/**, /api/items/**
+              filters:
+                - StripPrefix=1
+
+            - id: user-service
+              uri: http://localhost:4002
+              predicates:
+                - Path=/api/users/**, /api/addresses/**, /api/admin/**
               filters:
                 - StripPrefix=1
   security:

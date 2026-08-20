@@ -1,4 +1,4 @@
-### GET keycloak token
+### GET keycloak token for client
 POST http://localhost:8081/realms/portshop-realm/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
@@ -13,9 +13,8 @@ client_id=portshop-api
     console.log("Access token saved: ", client.global.get("access_token"))
     console.log("Refresh token saved: ", client.global.get("refresh_token"))
 %}
-###
 
-### Refresh Keycloak access token
+### Refresh Keycloak access token for client
 POST http://localhost:8081/realms/portshop-realm/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
@@ -29,7 +28,6 @@ grant_type=refresh_token
     client.global.set("access_token", response.body.access_token);
     console.log("Access token deprecated: ", client.global.get("access_token"));
  %}
-###
 
 ### Test GET request with/without access token
 GET http://localhost:4000/api/products/4c1c0756-898d-4104-a57d-352dcdd4c47e

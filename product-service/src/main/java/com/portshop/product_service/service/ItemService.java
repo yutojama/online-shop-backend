@@ -44,8 +44,13 @@ public class ItemService {
     }
 
     /* get item */
-    public Optional<Item> getItem(UUID id){
-        return itemRepository.findById(id);
+    public Item getItem(UUID id){
+        Optional<Item> item = itemRepository.findById(id);
+        if(item.isPresent()){
+            return item.get();
+        } else {
+            throw new ItemNotFoundException("Item not found: "+id);
+        }
     }
 
 }

@@ -1,0 +1,30 @@
+### GET product
+GET http://localhost:4000/api/products/get-prod/4c1c0756-898d-4104-a57d-352dcdd4c47e
+Authorization: Bearer {{access_token}}
+
+### Create product
+POST http://localhost:4000/api/products/create-prod
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+"brand": "demo-brand",
+"category": "top",
+"gender": "M",
+"description": "Demo description",
+"quantity": 0,
+"daysOfDelivery": 5,
+"origPrice": 499,
+"discountPrice": 399,
+"image": "demo-image"
+}
+
+### Delete product
+DELETE http://localhost:4000/api/products/delete-prod/cbd75677-fc86-40cd-bac1-b3f44bd8e3b6
+Authorization: Bearer {{access_token}}
+
+
+
+### GET item
+GET http://localhost:4000/api/items/get-item/3712f4e4-ca3a-4e4b-a7a2-f50e9c44185e
+Authorization: Bearer {{access_token}}

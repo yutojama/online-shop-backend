@@ -1,5 +1,6 @@
 package com.portshop.user_service.exception;
 
+import org.apache.http.auth.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(KeycloakCreateUserException.class)
     public ResponseEntity<?> handleKeycloakCreateUserException(KeycloakCreateUserException e){
         Map<String, String> errors = new HashMap<>();
-        errors.put("error ", "Could not create Keycloak user: " + e.getMessage());
+        errors.put("error ", e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
 
@@ -31,7 +32,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(KeycloakDeleteFailedException.class)
     public ResponseEntity<?> handleKeycloakDeleteFailedException(KeycloakDeleteFailedException e){
         Map<String, String> errors = new HashMap<>();
-        errors.put("error ", "Could not delete Keycloak user: " + e.getMessage());
+        errors.put("error ", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<?> handleAddressNotFoundException(AddressNotFoundException e){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error ", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(InvalidKeycloakCredentialsException.class)
+    public ResponseEntity<?> handleInvalidKeycloakCredentialsException(InvalidKeycloakCredentialsException e){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error ", e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
 

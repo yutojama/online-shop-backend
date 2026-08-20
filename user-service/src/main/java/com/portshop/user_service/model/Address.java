@@ -38,14 +38,11 @@ public class Address {
     @Column(nullable = false)
     private String country;
 
-    @Column(nullable = false)
-    private boolean isDefault;
-
     @ManyToOne
     @JsonBackReference
     @JoinColumn(
             name = "user_id",
             nullable = false
     )
-    ApiUser user;
+    private ApiUser user;
 }

@@ -1,6 +1,7 @@
 package com.portshop.product_service.dto;
 
 import com.portshop.product_service.model.Item;
+import com.portshop.product_service.model.Product;
 import org.springframework.stereotype.Component;
 
 @Component
