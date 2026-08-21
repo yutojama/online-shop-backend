@@ -1,4 +1,4 @@
-package com.portshop.user_service.dto;
+package com.portshop.api_gateway.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

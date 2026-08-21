@@ -1,4 +1,4 @@
-package com.portshop.user_service.dto;
+package com.portshop.api_gateway.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

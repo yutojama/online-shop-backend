@@ -1,9 +1,9 @@
-package com.portshop.user_service.service;
+package com.portshop.api_gateway.service;
 
-import com.portshop.user_service.dto.UserRequestDTO;
-import com.portshop.user_service.exception.KeycloakCreateUserException;
-import com.portshop.user_service.exception.KeycloakDeleteFailedException;
-import com.portshop.user_service.userEnum.Role;
+import com.portshop.api_gateway.dto.UserRequestDTO;
+import com.portshop.api_gateway.exception.KeycloakCreateUserException;
+import com.portshop.api_gateway.exception.KeycloakDeleteFailedException;
+import com.portshop.api_gateway.userEnum.Role;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleScopeResource;

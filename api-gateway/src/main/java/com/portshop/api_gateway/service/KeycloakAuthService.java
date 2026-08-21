@@ -1,10 +1,9 @@
-package com.portshop.user_service.service;
+package com.portshop.api_gateway.service;
 
-import com.portshop.user_service.dto.UserLoginRequestDTO;
-import com.portshop.user_service.exception.ApiUserNotFoundException;
-import com.portshop.user_service.exception.InvalidKeycloakCredentialsException;
-import org.apache.http.auth.InvalidCredentialsException;
+import com.portshop.api_gateway.dto.UserLoginRequestDTO;
+import com.portshop.api_gateway.exception.InvalidKeycloakCredentialsException;
 import org.keycloak.representations.AccessTokenResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -17,11 +16,8 @@ public class KeycloakAuthService {
 
     private final WebClient webClient;
 
-    @Value("${keycloak.server-url}")
-    private String serverUrl;
-
-    @Value("${keycloak.realm}")
-    private String realm;
+    @Value("${keycloak.token-url}")
+    private String tokenUrl;
 
     @Value("${keycloak.client-id}")
     private String clientId;
@@ -29,14 +25,16 @@ public class KeycloakAuthService {
     @Value("${keycloak.client-secret}")
     private String clientSecret;
 
-    public KeycloakAuthService(WebClient webClient) {
+    public KeycloakAuthService(
+            @Qualifier("keycloakWebClient") WebClient webClient
+    ) {
         this.webClient = webClient;
     }
 
     public AccessTokenResponse getAccessToken(UserLoginRequestDTO userLoginRequestDTO) {
         try {
             return webClient.post()
-                    .uri("http://localhost:8081/realms/portshop-realm/protocol/openid-connect/token")
+                    .uri(tokenUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData("client_id",clientId)
                             .with("client_secret", clientSecret)
@@ -54,7 +52,7 @@ public class KeycloakAuthService {
 
     public void logout(String refreshToken) {
         webClient.post()
-                .uri("http://localhost:8081/realms/portshop-realm/protocol/openid-connect/logout")
+                .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(
                         BodyInserters.fromFormData("client_id", clientId)
