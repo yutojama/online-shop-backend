@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class ItemController {
     }
 
     // deprecated, will be deleted later
+    @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @PostMapping("/add-item")
     public ResponseEntity<?> addItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
         Item item = Item.builder()
@@ -44,6 +46,7 @@ public class ItemController {
         return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(savedItem));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @PostMapping("/add-items")
     public ResponseEntity<?> addItems(@RequestBody List<ItemRequestDTO> itemRequestDTOs){
         List<Item> items = itemRequestDTOs.stream().map(itemRequestDTO ->
@@ -64,6 +67,7 @@ public class ItemController {
         return  ResponseEntity.ok().body(itemResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/import-data")
     public ResponseEntity<?> importData(@RequestBody List<ItemImportRequestDTO> itemImportRequestDTOS){
         List<Product> products = productService.findAllByOrderByCreatedAtAsc();

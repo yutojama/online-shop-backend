@@ -7,6 +7,7 @@ import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class ProductController {
     }
 
     // deprecated, will be deleted
+    @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @PostMapping("/create-prod")
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO){
         Product newProduct = productService.createProduct(productMapper.ProductRequestDTOToProduct(productRequestDTO));
@@ -32,6 +34,7 @@ public class ProductController {
         return ResponseEntity.ok().body(productResponseDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @PostMapping("/create-prods")
     public ResponseEntity<?> createProducts(@Valid @RequestBody List<ProductRequestDTO> productRequestDTO){
         for (ProductRequestDTO prod : productRequestDTO) {
@@ -47,12 +50,14 @@ public class ProductController {
         return ResponseEntity.ok().body(productResponseDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @DeleteMapping("/delete-prod/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable String id){
         productService.deleteProductById(UUID.fromString(id));
         return ResponseEntity.ok().body("Delete successful");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete-all")
     public ResponseEntity<?> deleteAllProducts(){
         productService.deleteAllProducts();

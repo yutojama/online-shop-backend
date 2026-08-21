@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,8 +22,8 @@ import java.util.*;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${keycloak.realm}")
-    private String realm;
+    @Value("${keycloak.client-id}")
+    private String clientId;
 
     @Bean
     SecurityFilterChain keycloakSecurityFilterChain(HttpSecurity http) {
@@ -35,13 +33,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/logout").permitAll()
-                        .requestMatchers("/api/users/*/role/*").hasRole("ADMIN")
-                        .requestMatchers("/api/users/delete-user/*").hasRole("ADMIN")
-
-                        .requestMatchers("/api/users/create-prod").hasAnyRole("ADMIN","SHOP")
-                        .requestMatchers("/api/users/create-prods").hasAnyRole("ADMIN","SHOP")
-                        .requestMatchers("/api/users/delete-prod/*").hasAnyRole("ADMIN","SHOP")
-                        .requestMatchers("/api/users/delete-all").hasAnyRole("ADMIN")
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
@@ -68,7 +59,7 @@ public class SecurityConfig {
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
             Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
             if (resourceAccess != null) {
-                Map<String, Object> client =  (Map<String, Object>) resourceAccess.get(realm);
+                Map<String, Object> client =  (Map<String, Object>) resourceAccess.get(clientId);
 
                 if (client != null) {
                     Collection<String> roles = (Collection<String>) client.get("roles");

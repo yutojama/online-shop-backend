@@ -55,4 +55,17 @@ public class AdminController {
         dataAgent.generateAddressData();
         return ResponseEntity.ok().body("Generate user data and address successfully");
     }
+
+
+    @PostMapping("/{userId}/role/{role}")
+    public ResponseEntity<?> updateUserRole(@PathVariable String userId, @PathVariable Role role) {
+        userService.updateUserRole(userId,role);
+        return ResponseEntity.ok().body("Role change successfully: "+role);
+    }
+
+    @DeleteMapping("/delete-user/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().body("User deleted successfully: "+userId);
+    }
 }

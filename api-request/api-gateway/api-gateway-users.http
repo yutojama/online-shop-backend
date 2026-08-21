@@ -58,11 +58,11 @@ Content-Type: application/json
 
 
 ### Update user role
-POST http://localhost:4000/api/users/9dbedb62-e2c8-4f28-b63e-7e2a0e250aaa/role/CUSTOMER
+POST http://localhost:4000/api/admin/67fdcddd-c373-4c26-af75-b3d1cd5534aa/role/CUSTOMER
 Authorization: Bearer {{access_token}}
 
 ### Delete specific user
-DELETE http://localhost:4000/api/users/delete-user/c4cb7f15-5856-496c-b72e-983a828c99f4
+DELETE http://localhost:4000/api/admin/delete-user/c4cb7f15-5856-496c-b72e-983a828c99f4
 Authorization: Bearer {{access_token}}
 
 

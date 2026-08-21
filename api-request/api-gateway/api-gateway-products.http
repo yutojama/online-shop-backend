@@ -20,7 +20,7 @@ Authorization: Bearer {{access_token}}
 }
 
 ### Delete product
-DELETE http://localhost:4000/api/products/delete-prod/cbd75677-fc86-40cd-bac1-b3f44bd8e3b6
+DELETE http://localhost:4000/api/products/delete-prod/29ee7dc7-1d94-4d5b-974e-a59f8a8c5b21
 Authorization: Bearer {{access_token}}
 
 

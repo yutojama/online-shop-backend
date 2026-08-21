@@ -29,6 +29,7 @@ public class AddressController {
         return ResponseEntity.ok().body(addressService.saveAddress(addressRequestDTO));
     }
 
+    // should only delete user's own addresses
     @DeleteMapping("/delete-address/{addressId}")
     public ResponseEntity<?> deleteAddress(@PathVariable String addressId){
         addressService.deleteAddress(addressId);
