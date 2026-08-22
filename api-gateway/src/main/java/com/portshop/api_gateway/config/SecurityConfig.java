@@ -43,7 +43,7 @@ public class SecurityConfig {
                         oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationTokenConverter()))
                 )
                 .sessionManagement(session->session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .httpBasic(httpBasic->httpBasic.disable())
                 .formLogin(formLogin->formLogin.disable())

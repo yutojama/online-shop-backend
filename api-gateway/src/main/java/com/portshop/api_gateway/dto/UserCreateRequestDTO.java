@@ -1,5 +1,6 @@
-package com.portshop.user_service.dto;
+package com.portshop.api_gateway.dto;
 
+import com.portshop.api_gateway.userEnum.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,14 +12,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequestDTO {
+public class UserCreateRequestDTO {
+
+    @NotBlank(message = "Keycloak ID is required")
+    private String keycloakId;
+
+    @NotBlank(message = "Role is required")
+    private Role role;
 
     @NotBlank(message = "Email is required")
     @Email
     private String email;
-
-    @NotBlank(message = "Password is required")
-    private String password;
 
     @NotBlank(message = "Firstname is required")
     private String firstName;
@@ -29,8 +33,7 @@ public class UserRequestDTO {
     @NotBlank(message = "Phone number is required")
     private String phone;
 
-    public String resolveUsername(){
-        return email.substring(0, email.indexOf("@"));
-    }
+    @NotBlank(message = "Username is required")
+    private String username;
 
 }

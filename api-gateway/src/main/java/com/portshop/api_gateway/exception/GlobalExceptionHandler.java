@@ -35,4 +35,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(AuthSessionNotFoundException.class)
+    public ResponseEntity<?> handleKeycloakUserNotFoundException(AuthSessionNotFoundException e){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error ", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }

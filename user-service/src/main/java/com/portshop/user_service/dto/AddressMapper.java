@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AddressMapper {
-    public Address requestDTOToAddress(AddressRequestDTO addressDTO){
+    public Address requestDTOToAddress(AddressCreateRequestDTO addressDTO){
         return Address.builder()
                 .firstName(addressDTO.getFirstName())
                 .lastName(addressDTO.getLastName())

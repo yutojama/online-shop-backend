@@ -1,6 +1,6 @@
 package com.portshop.user_service.data;
 
-import com.portshop.user_service.dto.AddressRequestDTO;
+import com.portshop.user_service.dto.AddressCreateRequestDTO;
 import com.portshop.user_service.model.ApiUser;
 import com.portshop.user_service.service.AddressService;
 import com.portshop.user_service.service.UserDbService;
@@ -31,7 +31,7 @@ public class DataAgent {
         users.forEach(user -> {
             for (int i = 0; i < 3; i++) {
                 if(ThreadLocalRandom.current().nextBoolean()){
-                    AddressRequestDTO addressRequestDTO = AddressRequestDTO.builder()
+                    AddressCreateRequestDTO addressCreateRequestDTO = AddressCreateRequestDTO.builder()
                             .userId(user.getId().toString())
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())
@@ -40,7 +40,7 @@ public class DataAgent {
                             .postalCode(faker.address().zipCode())
                             .country(faker.address().country())
                             .build();
-                    addressService.saveAddress(addressRequestDTO);
+                    addressService.saveAddress(addressCreateRequestDTO);
                 }
             }
         });

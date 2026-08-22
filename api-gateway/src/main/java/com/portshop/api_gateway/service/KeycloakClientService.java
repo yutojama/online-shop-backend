@@ -1,6 +1,6 @@
 package com.portshop.api_gateway.service;
 
-import com.portshop.api_gateway.dto.UserRequestDTO;
+import com.portshop.api_gateway.dto.RegisterRequestDTO;
 import com.portshop.api_gateway.exception.KeycloakCreateUserException;
 import com.portshop.api_gateway.exception.KeycloakDeleteFailedException;
 import com.portshop.api_gateway.userEnum.Role;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserKeycloakService {
+public class KeycloakClientService {
 
-    private final Logger logger = LoggerFactory.getLogger(UserKeycloakService.class);
+    private final Logger logger = LoggerFactory.getLogger(KeycloakClientService.class);
     private final Keycloak kc;
 
     @Value("${keycloak.realm}")
@@ -30,24 +30,24 @@ public class UserKeycloakService {
     @Value("${keycloak.client-id}")
     private String clientId;
 
-    public UserKeycloakService(Keycloak kc) {
+    public KeycloakClientService(Keycloak kc) {
         this.kc = kc;
     }
 
     // return keycloak id
-    public String createKeycloakUser(UserRequestDTO userRequestDTO) {
+    public String createKeycloakUser(RegisterRequestDTO registerRequestDTO) {
         // create keycloak user
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(userRequestDTO.resolveUsername());
-        user.setEmail(userRequestDTO.getEmail());
-        user.setFirstName(userRequestDTO.getFirstName());
-        user.setLastName(userRequestDTO.getLastName());
+        user.setUsername(registerRequestDTO.resolveUsername());
+        user.setEmail(registerRequestDTO.getEmail());
+        user.setFirstName(registerRequestDTO.getFirstName());
+        user.setLastName(registerRequestDTO.getLastName());
         user.setEnabled(true);
         user.setEmailVerified(false);
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(userRequestDTO.getPassword());
+        credential.setValue(registerRequestDTO.getPassword());
         credential.setTemporary(false);
 
         user.setCredentials(List.of(credential));

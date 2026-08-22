@@ -1,4 +1,4 @@
-package com.portshop.api_gateway.dto;
+package com.portshop.user_service.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequestDTO {
+public class RegisterRequestDTO {
 
     @NotBlank(message = "Email is required")
     @Email

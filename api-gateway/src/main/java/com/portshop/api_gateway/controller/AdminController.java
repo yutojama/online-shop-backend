@@ -1,9 +1,7 @@
 package com.portshop.api_gateway.controller;
 
 import com.portshop.api_gateway.data.DataAgent;
-import com.portshop.api_gateway.dto.UserRequestDTO;
-import com.portshop.api_gateway.service.UserDbService;
-import com.portshop.api_gateway.service.UserDebugService;
+import com.portshop.api_gateway.dto.RegisterRequestDTO;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
 import org.springframework.http.ResponseEntity;
@@ -13,29 +11,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserDebugService userDebugService;
     private final DataAgent dataAgent;
-    private final UserDbService userDbService;
     private final UserService userService;
 
-    public AdminController(UserDebugService userDebugService, DataAgent dataAgent, UserDbService userDbService, UserService userService) {
-        this.userDebugService = userDebugService;
+    public AdminController(DataAgent dataAgent, UserService userService) {
         this.dataAgent = dataAgent;
-        this.userDbService = userDbService;
         this.userService = userService;
-    }
-
-    // debugging controllers
-    @GetMapping("/debug-keycloak")
-    public ResponseEntity<?> getKeycloakClientInfo() {
-        return  ResponseEntity.ok().body(userDebugService.getKeycloakClientInfo());
     }
 
     @DeleteMapping("/reset-all")
     public ResponseEntity<?> deleteAllUsers() {
-        userDebugService.deleteAllUsers();
+        userService.deleteAllUsers();
         userService.createUser(
-                UserRequestDTO.builder()
+                RegisterRequestDTO.builder()
                         .email("admin@email.com")
                         .password("password")
                         .firstName("admin")

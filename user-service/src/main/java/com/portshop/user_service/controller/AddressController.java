@@ -1,6 +1,6 @@
 package com.portshop.user_service.controller;
 
-import com.portshop.user_service.dto.AddressRequestDTO;
+import com.portshop.user_service.dto.AddressCreateRequestDTO;
 import com.portshop.user_service.dto.AddressResponseDTO;
 import com.portshop.user_service.service.AddressService;
 import jakarta.validation.Valid;
@@ -25,8 +25,8 @@ public class AddressController {
     }
 
     @PostMapping("/add-address")
-    public ResponseEntity<?> addAddress(@Valid @RequestBody AddressRequestDTO addressRequestDTO){
-        return ResponseEntity.ok().body(addressService.saveAddress(addressRequestDTO));
+    public ResponseEntity<?> addAddress(@Valid @RequestBody AddressCreateRequestDTO addressCreateRequestDTO){
+        return ResponseEntity.ok().body(addressService.saveAddress(addressCreateRequestDTO));
     }
 
     // should only delete user's own addresses

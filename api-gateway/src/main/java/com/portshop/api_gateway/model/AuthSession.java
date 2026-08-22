@@ -14,22 +14,30 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AuthToken {
+public class AuthSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(unique = true, nullable = false)
+    private String sessionId;
+
+//    @Column(unique = true, nullable = false)
+//    private UUID userId;
+
+    @Column(unique = true, nullable = false)
     private String keycloakUserId;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String accessToken;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String refreshToken;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private Instant accessTokenExpiresAt;
+
+    private Instant refreshTokenExpiresAt;
 
 }

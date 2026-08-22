@@ -1,11 +1,13 @@
 package com.portshop.api_gateway.service;
 
-import com.portshop.api_gateway.dto.UserLoginRequestDTO;
+import com.portshop.api_gateway.dto.LoginRequestDTO;
 import com.portshop.api_gateway.exception.InvalidKeycloakCredentialsException;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 public class KeycloakAuthService {
 
     private final WebClient webClient;
+    private final JwtDecoder jwtDecoder;
 
     @Value("${keycloak.token-url}")
     private String tokenUrl;
@@ -26,12 +29,13 @@ public class KeycloakAuthService {
     private String clientSecret;
 
     public KeycloakAuthService(
-            @Qualifier("keycloakWebClient") WebClient webClient
-    ) {
+            @Qualifier("keycloakWebClient") WebClient webClient,
+            JwtDecoder jwtDecoder) {
         this.webClient = webClient;
+        this.jwtDecoder = jwtDecoder;
     }
 
-    public AccessTokenResponse getAccessToken(UserLoginRequestDTO userLoginRequestDTO) {
+    public AccessTokenResponse getAccessToken(LoginRequestDTO loginRequestDTO) {
         try {
             return webClient.post()
                     .uri(tokenUrl)
@@ -39,8 +43,8 @@ public class KeycloakAuthService {
                     .body(BodyInserters.fromFormData("client_id",clientId)
                             .with("client_secret", clientSecret)
                             .with("grant_type", "password")
-                            .with("username", userLoginRequestDTO.getUsername())
-                            .with("password", userLoginRequestDTO.getPassword())
+                            .with("username", loginRequestDTO.getUsername())
+                            .with("password", loginRequestDTO.getPassword())
                     )
                     .retrieve()
                     .bodyToMono(AccessTokenResponse.class)
@@ -48,6 +52,11 @@ public class KeycloakAuthService {
         } catch (WebClientResponseException.BadRequest e) {
             throw new InvalidKeycloakCredentialsException(e.getMessage());
         }
+    }
+
+    public String getKeycloakId(AccessTokenResponse accessTokenResponse) {
+        Jwt jwt = jwtDecoder.decode(accessTokenResponse.getToken());
+        return jwt.getSubject();
     }
 
     public void logout(String refreshToken) {

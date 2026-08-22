@@ -1,19 +1,17 @@
 package com.portshop.user_service.service;
 
 import com.portshop.user_service.dto.AddressMapper;
-import com.portshop.user_service.dto.AddressRequestDTO;
+import com.portshop.user_service.dto.AddressCreateRequestDTO;
 import com.portshop.user_service.dto.AddressResponseDTO;
 import com.portshop.user_service.exception.AddressNotFoundException;
 import com.portshop.user_service.model.Address;
 import com.portshop.user_service.model.ApiUser;
 import com.portshop.user_service.repository.AddressRepository;
-import com.portshop.user_service.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AddressService {
@@ -28,7 +26,7 @@ public class AddressService {
         this.addressMapper = addressMapper;
     }
 
-    public AddressResponseDTO saveAddress(AddressRequestDTO addressDTO) {
+    public AddressResponseDTO saveAddress(AddressCreateRequestDTO addressDTO) {
         ApiUser user = userDbService.getApiUser(addressDTO.getUserId());
         Address address = addressMapper.requestDTOToAddress(addressDTO);
         user.addAddress(address);

@@ -1,13 +1,12 @@
 package com.portshop.api_gateway.data;
 
-import com.portshop.api_gateway.dto.UserRequestDTO;
+import com.portshop.api_gateway.dto.RegisterRequestDTO;
 import com.portshop.api_gateway.service.UserDbService;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
 import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -28,7 +27,7 @@ public class DataAgent {
             String domain = faker.internet().emailAddress();
             String email = firstname.toLowerCase() + '_' +lastname.toLowerCase() + '@'
                     + domain.split("@")[1];
-            UserRequestDTO userRequestDTO = UserRequestDTO.builder()
+            RegisterRequestDTO registerRequestDTO = RegisterRequestDTO.builder()
                     .email(email)
                     .password("password")
                     .firstName(firstname)
@@ -36,11 +35,15 @@ public class DataAgent {
                     .phone(faker.phoneNumber().phoneNumber())
                     .build();
             Role val = ThreadLocalRandom.current().nextBoolean()?Role.CUSTOMER:Role.SHOP;
-            userService.createUser(userRequestDTO, val);
+            userService.createUser(registerRequestDTO, val);
         }
     }
 
     public void generateAddressData() {
 
+    }
+
+    public void deleteAllUsers() {
+        userService.deleteAllUsers();
     }
 }

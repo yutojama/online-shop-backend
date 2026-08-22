@@ -1,6 +1,6 @@
 package com.portshop.user_service.service;
 
-import com.portshop.user_service.dto.UserRequestDTO;
+import com.portshop.user_service.dto.UserCreateRequestDTO;
 import com.portshop.user_service.exception.ApiUserNotFoundException;
 import com.portshop.user_service.model.ApiUser;
 import com.portshop.user_service.repository.UserRepository;
@@ -21,15 +21,15 @@ public class UserDbService {
     }
 
     // return user id
-    public String createUser(String keycloakUserId, Role role, UserRequestDTO userRequestDTO) {
+    public String createUser(UserCreateRequestDTO userCreateRequestDTO) {
         // create customer and save in db
         ApiUser newApiUser = ApiUser.builder()
-                .keycloakUserId(keycloakUserId)
-                .role(role)
-                .email(userRequestDTO.getEmail())
-                .firstName(userRequestDTO.getFirstName())
-                .lastName(userRequestDTO.getLastName())
-                .phone(userRequestDTO.getPhone())
+                .keycloakUserId(userCreateRequestDTO.getKeycloakId())
+                .role(userCreateRequestDTO.getRole())
+                .email(userCreateRequestDTO.getEmail())
+                .firstName(userCreateRequestDTO.getFirstName())
+                .lastName(userCreateRequestDTO.getLastName())
+                .phone(userCreateRequestDTO.getPhone())
                 .build();
         ApiUser savedApiUser = saveApiUser(newApiUser);
         return savedApiUser.getId().toString();

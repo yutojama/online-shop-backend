@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginRequestDTO {
+public class LoginRequestDTO {
 
     @NotBlank(message = "Username required for login")
     private String username;

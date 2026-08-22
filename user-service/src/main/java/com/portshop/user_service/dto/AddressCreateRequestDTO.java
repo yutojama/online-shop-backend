@@ -1,6 +1,5 @@
 package com.portshop.user_service.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddressRequestDTO {
+public class AddressCreateRequestDTO {
 
     @NotNull(message = "User ID is required")
     protected String userId;
