@@ -1,5 +1,5 @@
 ### Login admin
-POST http://localhost:4000/api/users/login
+POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ Content-Type: application/json
 %}
 
 ### Login user
-POST http://localhost:4000/api/users/login
+POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
 {
@@ -56,6 +56,8 @@ Content-Type: application/json
 }
 
 
+### Test get me
+GET http://localhost:4000/admin/auth/me
 
 ### Update user role
 POST http://localhost:4000/api/admin/67fdcddd-c373-4c26-af75-b3d1cd5534aa/role/CUSTOMER

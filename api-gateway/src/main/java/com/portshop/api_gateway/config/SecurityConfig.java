@@ -1,6 +1,9 @@
 package com.portshop.api_gateway.config;
 
+import com.portshop.api_gateway.service.AuthDbService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier;
+import org.springframework.cloud.gateway.server.mvc.filter.SimpleFilterSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -14,6 +17,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.*;
 
@@ -26,21 +31,22 @@ public class SecurityConfig {
     private String clientId;
 
     @Bean
-    SecurityFilterChain keycloakSecurityFilterChain(HttpSecurity http) {
+    SecurityFilterChain keycloakSecurityFilterChain(
+            HttpSecurity http,
+            SecurityContextRepository securityContextRepository
+
+    ) {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/users/register").permitAll()
-                        .requestMatchers("/api/users/login").permitAll()
-                        .requestMatchers("/api/users/logout").permitAll()
-
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/admin/auth/**").hasRole("ADMIN")
 
                         .anyRequest()
                         .authenticated()
                 )
-                .oauth2ResourceServer(oauth2->
-                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationTokenConverter()))
+                .securityContext(context -> context
+                        .securityContextRepository(securityContextRepository)
                 )
                 .sessionManagement(session->session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -52,24 +58,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // this bean adds ROLE_ in front of all custom roles, because spring security need this prefix and otherwise invalid
+    // the session id only needs httpSession to validate,
+    // but still need security context for authentication (who is logged in) for @preAuthorized and .anyRequest().authenticated()
     @Bean
-    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationTokenConverter() {
-        return jwt -> {
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
-            if (resourceAccess != null) {
-                Map<String, Object> client =  (Map<String, Object>) resourceAccess.get(clientId);
-
-                if (client != null) {
-                    Collection<String> roles = (Collection<String>) client.get("roles");
-
-                    if (roles != null) {
-                        roles.forEach(role -> grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
-                    }
-                }
-            }
-            return new JwtAuthenticationToken(jwt, grantedAuthorities);
-        };
+    SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
     }
+
 }

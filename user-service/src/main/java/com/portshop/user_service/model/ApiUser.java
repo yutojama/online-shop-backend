@@ -45,14 +45,6 @@ public class ApiUser {
     @Column(nullable = false)
     private String phone;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
     @Builder.Default
     @OneToMany(
             mappedBy = "user",
@@ -71,5 +63,13 @@ public class ApiUser {
         address.setUser(null);
         this.addresses.remove(address);
     }
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
 }

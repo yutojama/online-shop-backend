@@ -1,6 +1,5 @@
 ### GET product
 GET http://localhost:4000/api/products/get-prod/4c1c0756-898d-4104-a57d-352dcdd4c47e
-Authorization: Bearer {{access_token}}
 
 ### Create product
 POST http://localhost:4000/api/products/create-prod

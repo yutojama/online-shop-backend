@@ -13,6 +13,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class KeycloakAuthService {
 
@@ -57,6 +60,27 @@ public class KeycloakAuthService {
     public String getKeycloakId(AccessTokenResponse accessTokenResponse) {
         Jwt jwt = jwtDecoder.decode(accessTokenResponse.getToken());
         return jwt.getSubject();
+    }
+
+    public String getKeycloakRole(AccessTokenResponse accessTokenResponse) {
+        Jwt jwt = jwtDecoder.decode(accessTokenResponse.getToken());
+        Map<String,Object> resourceAccess = jwt.getClaim("resource_access");
+        Map<String,Object> portShopAdmin = (Map<String, Object>)resourceAccess.get("portshop-admin");
+        List<String> roles = (List<String>)portShopAdmin.get("roles");
+        return roles.getFirst();
+    }
+
+    public AccessTokenResponse refreshAccessToken(String refreshToken) {
+        return webClient.post()
+                .uri(tokenUrl)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("grant_type", "refresh_token")
+                        .with("client_id", clientId)
+                        .with("client_secret", clientSecret)
+                        .with("refresh_token", refreshToken))
+                .retrieve()
+                .bodyToMono(AccessTokenResponse.class)
+                .block();
     }
 
     public void logout(String refreshToken) {

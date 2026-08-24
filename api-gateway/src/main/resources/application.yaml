@@ -7,18 +7,19 @@ spring:
         webmvc:
           routes:
             - id: product-service
-              uri: ${USER_SERVICE_URL}
+              uri: ${PRODUCT_SERVICE_URL}
               predicates:
                 - Path=/api/products/**, /api/items/**
               filters:
-                - StripPrefix=1
+                - proxyAccessToken
 
             - id: user-service
-              uri: ${PRODUCT_SERVICE_URL}
+              uri: ${USER_SERVICE_URL}
               predicates:
-                - Path=/api/users/**, /api/addresses/**, /api/admin/**
+                - Path=/api/users/**, /api/addresses/**, /admin/users/**
               filters:
-                - StripPrefix=1
+                - proxyAccessToken
+
   security:
     oauth2:
       resourceserver:
@@ -29,5 +30,7 @@ server:
   port: 4000
 
 app:
+  product-service:
+    url: ${PRODUCT_SERVICE_URL}
   user-service:
     url: ${USER_SERVICE_URL}

@@ -14,6 +14,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,9 +35,7 @@ public class SecurityConfig {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/users/login").permitAll()
-                        .requestMatchers("/users/logout").permitAll()
-                        .requestMatchers("/users/register").permitAll()
+                        .requestMatchers("/api/users/create").permitAll()
                         .anyRequest()
                         .authenticated()
                 )
@@ -72,4 +72,5 @@ public class SecurityConfig {
             return new JwtAuthenticationToken(jwt, grantedAuthorities);
         };
     }
+
 }

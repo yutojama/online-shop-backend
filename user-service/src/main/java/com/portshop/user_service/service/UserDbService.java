@@ -74,7 +74,16 @@ public class UserDbService {
         if(apiUser.isPresent()) {
             return apiUser.get();
         }else {
-            throw new ApiUserNotFoundException("User not found: "+userId);
+            throw new ApiUserNotFoundException("User not found, userId: "+userId);
+        }
+    }
+
+    public ApiUser getApiUserByKeycloakId(String keycloakUserId) {
+        Optional<ApiUser> apiUser = userRepository.getApiUserByKeycloakUserId(keycloakUserId);
+        if(apiUser.isPresent()) {
+            return apiUser.get();
+        }else {
+            throw new ApiUserNotFoundException("User not found, keycloakUserId: "+keycloakUserId);
         }
     }
 

@@ -17,7 +17,7 @@ public class DataAgent {
     private final UserDbService userDbService;
     private final AddressService addressService;
 
-    public DataAgent(UserService userService, UserDbService userDbService, AddressService addressService) {
+    public DataAgent(UserDbService userDbService, AddressService addressService) {
         this.userDbService = userDbService;
         this.faker = new Faker();
         this.addressService = addressService;

@@ -2,21 +2,35 @@ package com.portshop.api_gateway.controller;
 
 import com.portshop.api_gateway.data.DataAgent;
 import com.portshop.api_gateway.dto.RegisterRequestDTO;
+import com.portshop.api_gateway.service.UserDbService;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/auth")
 public class AdminController {
 
+    private final Logger logger = LoggerFactory.getLogger(AdminController.class);
     private final DataAgent dataAgent;
     private final UserService userService;
+    private final UserDbService userDbService;
 
-    public AdminController(DataAgent dataAgent, UserService userService) {
+    public AdminController(DataAgent dataAgent, UserService userService, UserDbService userDbService) {
         this.dataAgent = dataAgent;
         this.userService = userService;
+        this.userDbService = userDbService;
+    }
+
+    // this is the admin version to test if the web client could add valid token on request
+    @GetMapping("/me")
+    public Object getMe(Authentication authentication) {
+        logger.info("calling /me, keycloak ID: {}", authentication.getName());
+        return userDbService.getUser(authentication.getName());
     }
 
     @DeleteMapping("/reset-all")
