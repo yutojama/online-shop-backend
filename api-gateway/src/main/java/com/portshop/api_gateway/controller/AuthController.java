@@ -89,9 +89,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> createUser(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
-        String userId = userService.createUser(registerRequestDTO, Role.CUSTOMER);
-        return ResponseEntity.ok().body("Customer created successfully: "+userId);
+    public Mono<ResponseEntity<?>> createUser(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
+        return userService.createUser(registerRequestDTO, Role.CUSTOMER).flatMap(userId ->
+                        Mono.just(ResponseEntity.ok().body("User created successfully"+userId))
+                );
     }
 
 }

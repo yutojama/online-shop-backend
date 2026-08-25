@@ -19,7 +19,7 @@ public class UserDbService {
     }
 
     // return user id
-    public String createUser(String keycloakUserId, Role role, RegisterRequestDTO registerRequestDTO) {
+    public Mono<String> createUser(String keycloakUserId, Role role, RegisterRequestDTO registerRequestDTO) {
         // create customer and save in db
         UserCreateRequestDTO userCreateRequestDTO = UserCreateRequestDTO.builder()
                 .keycloakId(keycloakUserId)
@@ -34,8 +34,7 @@ public class UserDbService {
         return webClient.post()
                 .uri("/api/users/create", userCreateRequestDTO)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .bodyToMono(String.class);
     }
 
     // this is the admin version to test if the web client could add valid token on request
@@ -47,32 +46,32 @@ public class UserDbService {
     }
 
     // return keycloak id
-    public String updateUserRole(String userId, Role role) {
+    public Mono<String> updateUserRole(String userId, Role role) {
         return webClient.post()
                 .uri("/api/users/{userId}/role/{role}", userId, role)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .bodyToMono(String.class);
     }
 
-    public Role getRole(String userId) {
+    public Mono<Role> getRole(String userId) {
         return webClient.get()
                 .uri("/api/users/get-role/{userId}", userId)
                 .retrieve()
-                .bodyToMono(Role.class)
-                .block();
+                .bodyToMono(Role.class);
     }
 
     // return keycloak id
-    public String deleteUser(String userId) {
+    public Mono<String> deleteUser(String userId) {
         return webClient.delete()
                 .uri("/api/users/delete-user/{userId}", userId)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .bodyToMono(String.class);
     }
 
-    public void deleteAllUsers() {
-
+    public Mono<Void> deleteAllUsers() {
+        return webClient.delete()
+                .uri("/admin/users/reset-all")
+                .retrieve()
+                .bodyToMono(String.class).then();
     }
 }

@@ -37,39 +37,45 @@ public class AdminController {
     }
 
     @DeleteMapping("/reset-all")
-    public ResponseEntity<?> deleteAllUsers() {
-        userService.deleteAllUsers();
-        userService.createUser(
-                RegisterRequestDTO.builder()
-                        .email("admin@email.com")
-                        .password("password")
-                        .firstName("admin")
-                        .lastName("admin")
-                        .phone("101")
-                        .build(),
-                Role.ADMIN
+    public Mono<ResponseEntity<?>> deleteAllUsers() {
+        return userService.deleteAllUsers().then(
+                userService.createUser(
+                        RegisterRequestDTO.builder()
+                                .email("admin@email.com")
+                                .password("password")
+                                .firstName("admin")
+                                .lastName("admin")
+                                .phone("101")
+                                .build(),
+                        Role.ADMIN
+                ).then(
+                        Mono.just(ResponseEntity.ok().body("All users deleted successfully"))
+                )
         );
-        return ResponseEntity.ok().body("All users deleted successfully");
     }
 
     /** generate data */
     @GetMapping("/generate-data/{amount}")
-    public ResponseEntity<?> generateUserData(@PathVariable Integer amount) {
-        dataAgent.generateUserData(amount);
-        dataAgent.generateAddressData();
-        return ResponseEntity.ok().body("Generate user data and address successfully");
+    public Mono<ResponseEntity<?>> generateUserData(@PathVariable Integer amount) {
+        return dataAgent.generateUserData(amount).then(
+                dataAgent.generateAddressData().then(
+                        Mono.just(ResponseEntity.ok().body("Generate user data and address successfully"))
+                )
+        );
     }
 
 
     @PostMapping("/{userId}/role/{role}")
-    public ResponseEntity<?> updateUserRole(@PathVariable String userId, @PathVariable Role role) {
-        userService.updateUserRole(userId,role);
-        return ResponseEntity.ok().body("Role change successfully: "+role);
+    public Mono<ResponseEntity<?>> updateUserRole(@PathVariable String userId, @PathVariable Role role) {
+        return userService.updateUserRole(userId,role).then(
+                Mono.just(ResponseEntity.ok().body("Role updated successfully"+role))
+        );
     }
 
     @DeleteMapping("/delete-user/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ResponseEntity.ok().body("User deleted successfully: "+userId);
+    public Mono<ResponseEntity<?>> deleteUser(@PathVariable String userId) {
+        return userService.deleteUser(userId).then(
+                Mono.just(ResponseEntity.ok().body("User deleted successfully"+userId))
+        );
     }
 }

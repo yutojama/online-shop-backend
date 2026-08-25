@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 public class UserService {
@@ -25,47 +26,48 @@ public class UserService {
         this.keycloakClientService = keycloakClientService;
     }
 
-    public String createUser(RegisterRequestDTO registerRequestDTO, Role role) {
-        String kcId = keycloakClientService.createKeycloakUser(registerRequestDTO);
+    public Mono<String> createUser(RegisterRequestDTO registerRequestDTO, Role role) {
+        Mono<String> kcIdMono = keycloakClientService.createKeycloakUser(registerRequestDTO);
 
         // try adding role
-        try{
-            keycloakClientService.updateUserRole(kcId, role);
-        }catch (Exception e){
-            keycloakClientService.deleteKeycloakUser(kcId);
-        }
+        Mono<Void> addRoleMono = kcIdMono.flatMap(kcId ->
+                keycloakClientService.updateUserRole(kcId, role)
+                        .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
+        );
 
         // try creating db user
-        String userId = null;
-        try{
-            userId = userDbService.createUser(kcId,role, registerRequestDTO);
-        }catch (Exception e){
-            keycloakClientService.deleteKeycloakUser(kcId);
-        }
+        return addRoleMono.then(
+                // this returns userId
+                kcIdMono.flatMap(kcId ->
+                    userDbService.createUser(kcId,role,registerRequestDTO)
+                            .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
+                )
+        );
 
-        return userId;
     }
 
-    public void updateUserRole(String userId, Role role) {
-        Role preRole = userDbService.getRole(userId);
-        String kcId = userDbService.updateUserRole(userId,role);
+    public Mono<Void> updateUserRole(String userId, Role role) {
+        Mono<Role> preRoleMono = userDbService.getRole(userId);
+        Mono<String> kcIdMono = userDbService.updateUserRole(userId,role);
 
         // try updating role
-        try{
-            keycloakClientService.updateUserRole(kcId, role);
-        }catch (Exception e){
-            userDbService.updateUserRole(kcId,preRole);
-        }
+        return kcIdMono.flatMap(kcId ->
+                keycloakClientService.updateUserRole(kcId,role)
+                        .onErrorResume(e-> preRoleMono.flatMap(preRole->
+                                userDbService.updateUserRole(kcId,role)
+                                ).then(Mono.error(e))
+                        )
+        ).then();
     }
 
-    public void deleteUser(String userId) {
-        String kcId = userDbService.deleteUser(userId);
-        keycloakClientService.deleteKeycloakUser(kcId);
+    public Mono<Void> deleteUser(String userId) {
+        Mono<String> kcIdMono = userDbService.deleteUser(userId);
+        return kcIdMono.flatMap(keycloakClientService::deleteKeycloakUser);
     }
 
-    public void deleteAllUsers() {
-        userDbService.deleteAllUsers();
-        keycloakClientService.deleteAllKeycloakUsers();
+    public Mono<Void> deleteAllUsers() {
+        return userDbService.deleteAllUsers()
+                        .then(keycloakClientService.deleteAllKeycloakUsers());
     }
 
 }

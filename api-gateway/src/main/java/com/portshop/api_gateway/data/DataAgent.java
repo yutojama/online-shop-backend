@@ -6,6 +6,8 @@ import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
 import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,30 +22,32 @@ public class DataAgent {
         this.faker = new Faker();
     }
 
-    public void generateUserData(Integer nr) {
-        for (int i=0; i<nr; i++) {
-            String firstname = faker.name().firstName().replace("'","");
-            String lastname = faker.name().lastName().replace("'","");
-            String domain = faker.internet().emailAddress();
-            String email = firstname.toLowerCase() + '_' +lastname.toLowerCase() + '@'
-                    + domain.split("@")[1];
-            RegisterRequestDTO registerRequestDTO = RegisterRequestDTO.builder()
-                    .email(email)
-                    .password("password")
-                    .firstName(firstname)
-                    .lastName(lastname)
-                    .phone(faker.phoneNumber().phoneNumber())
-                    .build();
-            Role val = ThreadLocalRandom.current().nextBoolean()?Role.CUSTOMER:Role.SHOP;
-            userService.createUser(registerRequestDTO, val);
-        }
+    public Mono<Void> generateUserData(Integer nr) {
+        return Mono.fromRunnable(() -> {
+            for (int i=0; i<nr; i++) {
+                String firstname = faker.name().firstName().replace("'","");
+                String lastname = faker.name().lastName().replace("'","");
+                String domain = faker.internet().emailAddress();
+                String email = firstname.toLowerCase() + '_' +lastname.toLowerCase() + '@'
+                        + domain.split("@")[1];
+                RegisterRequestDTO registerRequestDTO = RegisterRequestDTO.builder()
+                        .email(email)
+                        .password("password")
+                        .firstName(firstname)
+                        .lastName(lastname)
+                        .phone(faker.phoneNumber().phoneNumber())
+                        .build();
+                Role val = ThreadLocalRandom.current().nextBoolean()?Role.CUSTOMER:Role.SHOP;
+                userService.createUser(registerRequestDTO, val);
+            }
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 
-    public void generateAddressData() {
-
+    public Mono<Void> generateAddressData() {
+        return Mono.empty();
     }
 
-    public void deleteAllUsers() {
-        userService.deleteAllUsers();
+    public Mono<Void> deleteAllUsers() {
+        return userService.deleteAllUsers();
     }
 }

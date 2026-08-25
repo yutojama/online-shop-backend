@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class KeycloakClientService {
     }
 
     // return keycloak id
-    public String createKeycloakUser(RegisterRequestDTO registerRequestDTO) {
+    public Mono<String> createKeycloakUser(RegisterRequestDTO registerRequestDTO) {
         // create keycloak user
         UserRepresentation user = new UserRepresentation();
         user.setUsername(registerRequestDTO.resolveUsername());
@@ -52,85 +54,106 @@ public class KeycloakClientService {
 
         user.setCredentials(List.of(credential));
 
-        String location;
-        try (Response response = kc
-                .realm(realm)
-                .users()
-                .create(user)) {
+        Mono<Response> responseMono = Mono.fromCallable(()->
+                 kc.realm(realm)
+                         .users()
+                         .create(user))
+                .subscribeOn(Schedulers.boundedElastic());
 
+        // get keycloak id from response
+        return responseMono.handle((response, sink) -> {
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-                throw new KeycloakCreateUserException("Could not create Keycloak user: " + String.valueOf(response.getStatus()));
+                sink.error(new KeycloakCreateUserException("Could not create Keycloak user: " + String.valueOf(response.getStatus())));
+                return;
             }
+            String location = response.getLocation().toString();
+            String kId = location.substring(location.lastIndexOf("/") + 1);
+            sink.next(kId);
+        });
 
-            // Location header contains the newly created user's URL
-            location = response.getLocation().toString();
-        }
-
-        return location.substring(location.lastIndexOf("/") + 1);
     }
 
-    public void updateUserRole(String keycloakUserId, Role role) {
+    public Mono<Void> updateUserRole(String keycloakUserId, Role role) {
         // get client id
-        ClientRepresentation client = kc
-                .realm(realm)
-                .clients()
-                .findByClientId(clientId)
-                .getFirst();
-
-        String kcClientId = client.getId();
-        logger.debug("Client ID: " + kcClientId);
+        Mono<String> kcClientIdMono = Mono.fromCallable(()-> {
+            ClientRepresentation client = kc.realm(realm)
+                    .clients()
+                    .findByClientId(clientId)
+                    .getFirst();
+            return client.getId();
+        }).subscribeOn(Schedulers.boundedElastic());
 
         // find target role by client id
-        RoleRepresentation roleRepresentation = kc
-                .realm(realm)
-                .clients()
-                .get(kcClientId)
-                .roles()
-                .get(role.toString())
-                .toRepresentation();
+        Mono<RoleRepresentation> roleRepresentationMono = kcClientIdMono.flatMap(kcClientId -> {
+            return Mono.fromCallable(()->{
+                return kc
+                    .realm(realm)
+                    .clients()
+                    .get(kcClientId)
+                    .roles()
+                    .get(role.toString())
+                    .toRepresentation();
+            });
+        });
 
-        // add target role to user
-        RoleScopeResource clientRoles = kc
-                .realm(realm)
-                .users()
-                .get(keycloakUserId)
-                .roles()
-                .clientLevel(kcClientId);
+        // get user roles
+        Mono<RoleScopeResource> clientRolesMono = kcClientIdMono.flatMap(kcId -> {
+            return Mono.fromCallable(()->{
+                return kc
+                    .realm(realm)
+                    .users()
+                    .get(keycloakUserId)
+                    .roles()
+                    .clientLevel(kcId);
+            }).subscribeOn(Schedulers.boundedElastic());
+        });
 
         // remove existing roles
-        List<RoleRepresentation> currentRoles = clientRoles.listAll();
-        if (!currentRoles.isEmpty()) {
-            clientRoles.remove(currentRoles);
-        }
+        Mono<RoleScopeResource> emptyRoles = clientRolesMono.map(clientRoles -> {
+            List<RoleRepresentation> currentRoles = clientRoles.listAll();
+            if (!currentRoles.isEmpty()) {
+                clientRoles.remove(currentRoles);
+            }
+            return clientRoles;
+        });
 
         // add new role
-        clientRoles.add(List.of(roleRepresentation));
+        return emptyRoles.flatMap(clientRoles -> roleRepresentationMono.map(
+                roleRepresentation -> {
+                    clientRoles.add(List.of(roleRepresentation));
+                    return clientRoles;
+                }
+        )).then();
 
     }
 
-    public void deleteKeycloakUser(String keycloakUserId) {
-        try (Response deleteResponse = kc
-                .realm(realm)
-                .users()
-                .delete(keycloakUserId)) {
-            if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-                throw new KeycloakDeleteFailedException("Could not delete Keycloak user: " + String.valueOf(deleteResponse.getStatus()));
+    public Mono<Void> deleteKeycloakUser(String keycloakUserId) {
+        return Mono.fromRunnable(()->{
+            try (Response deleteResponse = kc
+                    .realm(realm)
+                    .users()
+                    .delete(keycloakUserId)) {
+                if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+                    throw new KeycloakDeleteFailedException("Could not delete Keycloak user: " + String.valueOf(deleteResponse.getStatus()));
+                }
             }
-        }
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 
-    public void deleteAllKeycloakUsers() {
+    public Mono<Void> deleteAllKeycloakUsers() {
         // keycloak users are paginated, so delete in batch
         int batchSize = 100;
 
-        while (true){
-            List<UserRepresentation> users = kc
-                    .realm(realm)
-                    .users()
-                    .list();
-            if(users.isEmpty()){ break;}
-            users.forEach(user -> deleteKeycloakUser(user.getId()));
-        }
+        return Mono.fromRunnable(()->{
+            while (true){
+                List<UserRepresentation> users = kc
+                        .realm(realm)
+                        .users()
+                        .list(0, batchSize);
+                if(users.isEmpty()){ break;}
+                users.forEach(user -> deleteKeycloakUser(user.getId()));
+            }
+        }).subscribeOn(Schedulers.boundedElastic()).then();
 
     }
 
