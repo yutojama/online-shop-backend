@@ -1,18 +1,19 @@
 package com.portshop.api_gateway.config;
 
 import com.portshop.api_gateway.service.AuthDbService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpCookie;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 @Configuration
 public class WebClientConfig {
@@ -33,44 +34,37 @@ public class WebClientConfig {
                 .build();
     }
 
-    // client filter
+    // fetch access token when request other services with WebClient
     @Bean
     public ExchangeFilterFunction getExchangeFilterFunction(AuthDbService authDbService) {
-        return (request, next) -> {
+        return (request, next) ->
 
-            ServletRequestAttributes attributes =
-                    (ServletRequestAttributes)
-                            RequestContextHolder.getRequestAttributes();
+            ReactiveSecurityContextHolder.getContext()
+                    .flatMap(securityContext -> {
+                        Authentication authentication = securityContext.getAuthentication();
+                        if (authentication == null || !authentication.isAuthenticated()) {return next.exchange(request);}
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                        return Mono.deferContextual(contextView -> {
+                            ServerWebExchange exchange = contextView.get(ServerWebExchange.class);
 
-            if (attributes == null || !authentication.isAuthenticated()) {
-                return next.exchange(request);
-            }
+                            String sessionId = Optional.ofNullable(
+                                    exchange.getRequest()
+                                            .getCookies()
+                                            .getFirst("SESSION")
+                                    )
+                                    .map(HttpCookie::getValue)
+                                    .orElse(null);
+                            return authDbService.getValidAccessToken(sessionId)
+                                    .flatMap(accessToken -> {
+                                        ClientRequest authenticationRequest =
+                                                ClientRequest.from(request)
+                                                        .headers(headers -> headers.setBearerAuth(accessToken)).build();
 
-            HttpServletRequest servletRequest =
-                    attributes.getRequest();
-
-            HttpSession session =
-                    servletRequest.getSession(false);
-
-            if (session == null) {
-                return next.exchange(request);
-            }
-
-            String sessionId = session.getId();
-
-            String accessToken =
-                    authDbService.getValidAccessToken(sessionId);
-
-            ClientRequest authenticatedRequest =
-                    ClientRequest.from(request)
-                            .headers(headers ->
-                                    headers.setBearerAuth(accessToken))
-                            .build();
-
-            return next.exchange(authenticatedRequest);
-        };
+                                        return next.exchange(authenticationRequest);
+                                    });
+                        });
+                    })
+                    .switchIfEmpty(next.exchange(request));
     }
 
 }

@@ -1,56 +1,36 @@
 package com.portshop.api_gateway.config;
 
-import com.portshop.api_gateway.service.AuthDbService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier;
-import org.springframework.cloud.gateway.server.mvc.filter.SimpleFilterSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
-import java.util.*;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${keycloak.client-id}")
-    private String clientId;
-
     @Bean
-    SecurityFilterChain keycloakSecurityFilterChain(
-            HttpSecurity http,
-            SecurityContextRepository securityContextRepository
+    SecurityWebFilterChain keycloakSecurityFilterChain(
+            ServerHttpSecurity http,
+            ServerSecurityContextRepository contextRepository
 
     ) {
-        /* disable all spring security setups since we use keycloak */
+        // disable all spring security setups since we use keycloak
         http
-                .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/admin/auth/**").hasRole("ADMIN")
+                .authorizeExchange(exchanges->exchanges
+                        .pathMatchers("/api/auth/**").permitAll()
+                        .pathMatchers("/admin/auth/**").hasRole("ADMIN")
 
-                        .anyRequest()
+                        .anyExchange()
                         .authenticated()
                 )
-                .securityContext(context -> context
-                        .securityContextRepository(securityContextRepository)
-                )
-                .sessionManagement(session->session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                )
+                .securityContextRepository(contextRepository)
                 .httpBasic(httpBasic->httpBasic.disable())
                 .formLogin(formLogin->formLogin.disable())
                 .cors(cors->cors.disable())
@@ -58,11 +38,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // the session id only needs httpSession to validate,
-    // but still need security context for authentication (who is logged in) for @preAuthorized and .anyRequest().authenticated()
+    /** the session id only needs httpSession to validate,
+     but still need security context for authentication (who is logged in) for @preAuthorized and .anyRequest().authenticated()
+    */
     @Bean
-    SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
+    ServerSecurityContextRepository securityContextRepository() {
+        return new WebSessionServerSecurityContextRepository();
     }
 
 }

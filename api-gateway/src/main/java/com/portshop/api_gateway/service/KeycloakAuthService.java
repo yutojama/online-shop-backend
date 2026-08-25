@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -22,14 +23,20 @@ public class KeycloakAuthService {
     private final WebClient webClient;
     private final JwtDecoder jwtDecoder;
 
-    @Value("${keycloak.token-url}")
-    private String tokenUrl;
+    @Value("${keycloak.server-url}")
+    private String serverUrl;
+
+    @Value("${keycloak.realm}")
+    private String realm;
 
     @Value("${keycloak.client-id}")
     private String clientId;
 
     @Value("${keycloak.client-secret}")
     private String clientSecret;
+
+    @Value("${keycloak.token-url}")
+    private String tokenUrl;
 
     public KeycloakAuthService(
             @Qualifier("keycloakWebClient") WebClient webClient,
@@ -38,7 +45,7 @@ public class KeycloakAuthService {
         this.jwtDecoder = jwtDecoder;
     }
 
-    public AccessTokenResponse getAccessToken(LoginRequestDTO loginRequestDTO) {
+    public Mono<AccessTokenResponse> getAccessToken(LoginRequestDTO loginRequestDTO) {
         try {
             return webClient.post()
                     .uri(tokenUrl)
@@ -50,8 +57,7 @@ public class KeycloakAuthService {
                             .with("password", loginRequestDTO.getPassword())
                     )
                     .retrieve()
-                    .bodyToMono(AccessTokenResponse.class)
-                    .block();
+                    .bodyToMono(AccessTokenResponse.class);
         } catch (WebClientResponseException.BadRequest e) {
             throw new InvalidKeycloakCredentialsException(e.getMessage());
         }
@@ -70,7 +76,7 @@ public class KeycloakAuthService {
         return roles.getFirst();
     }
 
-    public AccessTokenResponse refreshAccessToken(String refreshToken) {
+    public Mono<AccessTokenResponse> refreshAccessToken(String refreshToken) {
         return webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -79,8 +85,7 @@ public class KeycloakAuthService {
                         .with("client_secret", clientSecret)
                         .with("refresh_token", refreshToken))
                 .retrieve()
-                .bodyToMono(AccessTokenResponse.class)
-                .block();
+                .bodyToMono(AccessTokenResponse.class);
     }
 
     public void logout(String refreshToken) {

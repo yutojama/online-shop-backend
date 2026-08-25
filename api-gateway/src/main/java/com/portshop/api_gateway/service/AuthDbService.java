@@ -3,15 +3,18 @@ package com.portshop.api_gateway.service;
 import com.portshop.api_gateway.exception.AuthSessionNotFoundException;
 import com.portshop.api_gateway.model.AuthSession;
 import com.portshop.api_gateway.repository.AuthRepository;
-import jakarta.persistence.Access;
 import org.keycloak.representations.AccessTokenResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 
 @Service
 public class AuthDbService {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final AuthRepository authRepository;
     private final KeycloakAuthService keycloakAuthService;
 
@@ -21,52 +24,70 @@ public class AuthDbService {
     }
 
     // return authSession id
-    public String saveAuthSession(String sessionId, String keycloakId, AccessTokenResponse accessTokenResponse) {
+    public Mono<String> saveAuthSession(String sessionId, String keycloakId, AccessTokenResponse accessTokenResponse) {
 
-        AuthSession authSession = authRepository.getAuthSessionByKeycloakUserId(keycloakId);
-        if (authSession == null) {
-            authSession = AuthSession.builder()
-                    .sessionId(sessionId)
-                    .keycloakUserId(keycloakId)
-                    .accessToken(accessTokenResponse.getToken())
-                    .refreshToken(accessTokenResponse.getRefreshToken())
-                    .accessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()))
-                    .refreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()))
-                    .build();
-        } else {
-            authSession.setSessionId(sessionId);
-            authSession.setAccessToken(accessTokenResponse.getToken());
-            authSession.setRefreshToken(accessTokenResponse.getRefreshToken());
-            authSession.setAccessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()));
-            authSession.setRefreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()));
-        }
-
-        AuthSession savedAuthSession = authRepository.save(authSession);
-        return savedAuthSession.getId().toString();
+        return authRepository.getAuthSessionByKeycloakUserId(keycloakId)
+                .flatMap(authSession->{
+                    if (authSession == null) {
+                        authSession = AuthSession.builder()
+                                .sessionId(sessionId)
+                                .keycloakUserId(keycloakId)
+                                .accessToken(accessTokenResponse.getToken())
+                                .refreshToken(accessTokenResponse.getRefreshToken())
+                                .accessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()))
+                                .refreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()))
+                                .build();
+                    } else {
+                        authSession.setSessionId(sessionId);
+                        authSession.setAccessToken(accessTokenResponse.getToken());
+                        authSession.setRefreshToken(accessTokenResponse.getRefreshToken());
+                        authSession.setAccessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()));
+                        authSession.setRefreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()));
+                    }
+                    return authRepository.save(authSession)
+                            .map(session -> session.getId().toString());
+                });
     }
 
-    public String getAccessToken(String keycloakId) {
-        AuthSession authSession = authRepository.getAuthSessionByKeycloakUserId(keycloakId);
-        if (authSession == null) {
-            throw new AuthSessionNotFoundException("Auth session not found with keycloak ID: "+keycloakId);
-        }
-        return authSession.getAccessToken();
+    public Mono<String> getAccessToken(String keycloakId) {
+        return authRepository.getAuthSessionByKeycloakUserId(keycloakId)
+                .switchIfEmpty(Mono.error(
+                        new AuthSessionNotFoundException("Auth session not found with keycloak ID: "+keycloakId)
+                ))
+                .map(AuthSession::getAccessToken);
     }
 
-    public String getValidAccessToken(String sessionId) {
-        AuthSession session = authRepository.getAuthSessionBySessionId(sessionId);
-        Instant expiresAt = session.getAccessTokenExpiresAt();
+    public Mono<String> getValidAccessToken(String sessionId) {
+        return authRepository.getAuthSessionBySessionId(sessionId)
+                .switchIfEmpty(Mono.error(
+                        new AuthSessionNotFoundException("Auth session not found with sessionId: "+sessionId)
+                ))
+                .flatMap(this::getValidOrRefreshToken);
+    }
+
+    // logic part of getValidAccessToken
+    private Mono<String> getValidOrRefreshToken(AuthSession authSession) {
+        Instant expiresAt = authSession.getAccessTokenExpiresAt();
         // check if access token has expired, then refresh
         if (expiresAt.isAfter(Instant.now().plusSeconds(20))) {
-            return session.getAccessToken();
+            return Mono.just(authSession.getAccessToken());
         }
-        AccessTokenResponse accessTokenResponse = keycloakAuthService.refreshAccessToken(sessionId);
-        // save the new jwt
-        session.setAccessToken(accessTokenResponse.getToken());
-        session.setRefreshToken(accessTokenResponse.getRefreshToken());
-        session.setAccessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()));
-        session.setRefreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()));
-        authRepository.save(session);
-        return accessTokenResponse.getToken();
+        return refreshToken(authSession);
     }
+
+    private Mono<String> refreshToken(AuthSession authSession) {
+        return keycloakAuthService.refreshAccessToken(authSession.getRefreshToken())
+                .flatMap(response->{
+                    logger.info("Access token refreshed");
+                    // save the new jwt
+                    authSession.setAccessToken(response.getToken());
+                    authSession.setRefreshToken(response.getRefreshToken());
+                    authSession.setAccessTokenExpiresAt(Instant.now().plusSeconds(response.getExpiresIn()));
+                    authSession.setRefreshTokenExpiresAt(Instant.now().plusSeconds(response.getRefreshExpiresIn()));
+
+                    return authRepository.save(authSession)
+                            .thenReturn(response.getToken());
+                });
+    }
+
 }

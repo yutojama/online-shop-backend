@@ -6,22 +6,24 @@ import com.portshop.api_gateway.service.AuthDbService;
 import com.portshop.api_gateway.service.KeycloakAuthService;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.keycloak.representations.AccessTokenResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -29,49 +31,61 @@ import java.util.List;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final UserService userService;
+    // not blocking
     private final KeycloakAuthService keycloakAuthService;
     private final AuthDbService authDbService;
-    private final SecurityContextRepository securityContextRepository;
+    private final ServerSecurityContextRepository serverSecurityContextRepository;
 
-    public AuthController(UserService userService, KeycloakAuthService keycloakAuthService, AuthDbService authDbService, SecurityContextRepository securityContextRepository) {
+    public AuthController(UserService userService, KeycloakAuthService keycloakAuthService, AuthDbService authDbService, ServerSecurityContextRepository serverSecurityContextRepository) {
         this.userService = userService;
         this.keycloakAuthService = keycloakAuthService;
         this.authDbService = authDbService;
-        this.securityContextRepository = securityContextRepository;
+        this.serverSecurityContextRepository = serverSecurityContextRepository;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @Valid @RequestBody LoginRequestDTO loginRequestDTO
-    ) {
-        // because of permitAll() on /login, there is no session created for this request,
-        // to the session ID will be changed for a new login to avoid session ID fixation
-        HttpSession session = request.getSession(true);
-        request.changeSessionId();
-        String sessionId = session.getId();
+    public Mono<ResponseEntity<?>> login(
+            ServerWebExchange exchange,
+            @Valid @RequestBody LoginRequestDTO loginRequestDTO) {
+
+        Mono<String> sessionId = exchange.getSession()
+                .map(WebSession::getId);
 
         // save jwt and session ID in auth db
-        AccessTokenResponse accessTokenResponse = keycloakAuthService.getAccessToken(loginRequestDTO);
-        String keycloakId = keycloakAuthService.getKeycloakId(accessTokenResponse);
-        String authSessionId = authDbService.saveAuthSession(sessionId, keycloakId, accessTokenResponse);
+        Mono<AccessTokenResponse> accessTokenResponseMono = keycloakAuthService.getAccessToken(loginRequestDTO);
+        Mono<String> keycloakId = accessTokenResponseMono.map(keycloakAuthService::getKeycloakId);
+        Mono<String> authSessionId = Mono.zip(sessionId, keycloakId, accessTokenResponseMono)
+                .flatMap(tuple -> authDbService.saveAuthSession(
+                        tuple.getT1(), tuple.getT2(), tuple.getT3()
+                ));
 
         // create Authentication
-        String role = keycloakAuthService.getKeycloakRole(accessTokenResponse);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(keycloakId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-        // create spring security context and save it
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        securityContextRepository.saveContext(context,request,response);
+        Mono<String> roleMono = accessTokenResponseMono.map(keycloakAuthService::getKeycloakRole);
+        Mono<Authentication> authenticationMono = Mono.zip(keycloakId, roleMono)
+                .map(tuple ->
+                        new UsernamePasswordAuthenticationToken(tuple.getT1(), null, List.of(new SimpleGrantedAuthority("ROLE_" + tuple.getT2())))
+                );
 
-        return ResponseEntity.ok().body("Login successful, auth session ID: "+authSessionId);
+        // create spring security context and save it
+        return authenticationMono.flatMap(auth -> {
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(auth);
+            return serverSecurityContextRepository.save(exchange,context)
+                    .then(authSessionId.map(
+                            asId -> ResponseEntity.ok().body("Login successful, auth session ID: "+asId)
+                    ));
+        });
+
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok().body("Logout successful");
+    public Mono<String> logout(ServerWebExchange exchange) {
+        return exchange.getSession()
+                .doOnNext(session ->
+                        logger.info("WebSession ID: {}", session.getId())
+                ).thenReturn("logout");
     }
 
     @PostMapping("/register")

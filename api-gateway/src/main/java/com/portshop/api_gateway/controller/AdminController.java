@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/admin/auth")
@@ -26,10 +28,11 @@ public class AdminController {
         this.userDbService = userDbService;
     }
 
-    // this is the admin version to test if the web client could add valid token on request
+    /** this is the admin version to test if the web client could add valid token on request */
     @GetMapping("/me")
-    public Object getMe(Authentication authentication) {
+    public Mono<Object> getMe(Authentication authentication, ServerWebExchange exchange) {
         logger.info("calling /me, keycloak ID: {}", authentication.getName());
+
         return userDbService.getUser(authentication.getName());
     }
 
@@ -49,7 +52,7 @@ public class AdminController {
         return ResponseEntity.ok().body("All users deleted successfully");
     }
 
-    // generate data
+    /** generate data */
     @GetMapping("/generate-data/{amount}")
     public ResponseEntity<?> generateUserData(@PathVariable Integer amount) {
         dataAgent.generateUserData(amount);

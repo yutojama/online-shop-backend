@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
 public class UserDbService {
@@ -38,12 +39,11 @@ public class UserDbService {
     }
 
     // this is the admin version to test if the web client could add valid token on request
-    public Object getUser(String keycloakUserId) {
+    public Mono<Object> getUser(String keycloakUserId) {
         return webClient.get()
                 .uri("/api/users/get-user/{keycloakUserId}", keycloakUserId)
                 .retrieve()
-                .bodyToMono(Object.class)
-                .block();
+                .bodyToMono(Object.class);
     }
 
     // return keycloak id
