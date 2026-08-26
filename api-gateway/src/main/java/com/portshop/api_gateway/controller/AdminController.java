@@ -55,9 +55,9 @@ public class AdminController {
     }
 
     /** generate data */
-    @GetMapping("/generate-data/{amount}")
-    public Mono<ResponseEntity<?>> generateUserData(@PathVariable Integer amount) {
-        return dataAgent.generateUserData(amount).then(
+    @GetMapping("/generate-data")
+    public Mono<ResponseEntity<?>> generateUserData(@RequestParam Integer shop, @RequestParam Integer cost) {
+        return dataAgent.generateUserData(shop,cost).then(
                 dataAgent.generateAddressData().then(
                         Mono.just(ResponseEntity.ok().body("Generate user data and address successfully"))
                 )
@@ -68,14 +68,14 @@ public class AdminController {
     @PostMapping("/{userId}/role/{role}")
     public Mono<ResponseEntity<?>> updateUserRole(@PathVariable String userId, @PathVariable Role role) {
         return userService.updateUserRole(userId,role).then(
-                Mono.just(ResponseEntity.ok().body("Role updated successfully"+role))
+                Mono.just(ResponseEntity.ok().body("Role updated successfully: "+role))
         );
     }
 
     @DeleteMapping("/delete-user/{userId}")
     public Mono<ResponseEntity<?>> deleteUser(@PathVariable String userId) {
         return userService.deleteUser(userId).then(
-                Mono.just(ResponseEntity.ok().body("User deleted successfully"+userId))
+                Mono.just(ResponseEntity.ok().body("User deleted successfully: "+userId))
         );
     }
 }

@@ -18,11 +18,10 @@ Content-Type: application/json
 
 ### Logout user
 POST http://localhost:4000/api/auth/logout
-Content-Type: application/json
 
 
 ### Register/add user
-POST http://localhost:4000/api/users/register
+POST http://localhost:4000/api/auth/register
 Content-Type: application/json
 
 {
@@ -35,23 +34,19 @@ Content-Type: application/json
 
 
 
-### Test get me
+### Test get me: only with admin role possible
 GET http://localhost:4000/admin/auth/me
 
 ### Update user role
-POST http://localhost:4000/api/admin/67fdcddd-c373-4c26-af75-b3d1cd5534aa/role/CUSTOMER
-Authorization: Bearer {{access_token}}
+POST http://localhost:4000/admin/auth/67fdcddd-c373-4c26-af75-b3d1cd5534aa/role/CUSTOMER
 
 ### Delete specific user
-DELETE http://localhost:4000/api/admin/delete-user/c4cb7f15-5856-496c-b72e-983a828c99f4
-Authorization: Bearer {{access_token}}
+DELETE http://localhost:4000/admin/auth/delete-user/55370969-eb41-405d-8fe1-1b964e171856
 
 
 
 ### Data agent
-GET http://localhost:4000/api/admin/generate-data/10
-Authorization: Bearer {{access_token}}
+GET http://localhost:4000/admin/auth/generate-data?shop=5&cost=10
 
 ### Delete users
-DELETE http://localhost:4000/api/admin/reset-all
-Authorization: Bearer {{access_token}}
+DELETE http://localhost:4000/admin/auth/reset-all

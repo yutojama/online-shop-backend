@@ -14,8 +14,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/create").permitAll()
                         .anyRequest()
                         .authenticated()
+
+//                        .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2->
                         oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationTokenConverter()))

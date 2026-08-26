@@ -30,19 +30,17 @@ public class UserService {
         Mono<String> kcIdMono = keycloakClientService.createKeycloakUser(registerRequestDTO);
 
         // try adding role
-        Mono<Void> addRoleMono = kcIdMono.flatMap(kcId ->
+        return kcIdMono.flatMap(kcId ->
                 keycloakClientService.updateUserRole(kcId, role)
                         .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
+                        .then(
+                                // this returns userId
+                                userDbService.createUser(kcId,role,registerRequestDTO)
+                                        .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
+                        )
         );
 
-        // try creating db user
-        return addRoleMono.then(
-                // this returns userId
-                kcIdMono.flatMap(kcId ->
-                    userDbService.createUser(kcId,role,registerRequestDTO)
-                            .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
-                )
-        );
+
 
     }
 

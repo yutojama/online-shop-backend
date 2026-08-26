@@ -21,7 +21,7 @@ public class AdminController {
 
     @DeleteMapping("/reset-all")
     public ResponseEntity<?> deleteAllUsers() {
-
+        userDbService.deleteAllUsers();
         return ResponseEntity.ok().body("All users deleted successfully");
     }
 

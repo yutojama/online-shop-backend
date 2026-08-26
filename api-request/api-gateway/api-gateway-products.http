@@ -4,7 +4,6 @@ GET http://localhost:4000/api/products/get-prod/4c1c0756-898d-4104-a57d-352dcdd4
 ### Create product
 POST http://localhost:4000/api/products/create-prod
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
 
 {
 "brand": "demo-brand",
@@ -20,10 +19,8 @@ Authorization: Bearer {{access_token}}
 
 ### Delete product
 DELETE http://localhost:4000/api/products/delete-prod/29ee7dc7-1d94-4d5b-974e-a59f8a8c5b21
-Authorization: Bearer {{access_token}}
 
 
 
 ### GET item
 GET http://localhost:4000/api/items/get-item/3712f4e4-ca3a-4e4b-a7a2-f50e9c44185e
-Authorization: Bearer {{access_token}}

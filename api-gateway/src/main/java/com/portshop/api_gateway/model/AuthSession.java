@@ -23,6 +23,8 @@ public class AuthSession {
 
     private String sessionId;
 
+    private String username;
+
     private String keycloakUserId;
 
     private String accessToken;

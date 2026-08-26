@@ -1,8 +1,11 @@
 ### Create new customer
-POST http://localhost:4002/users
+POST http://localhost:4002/api/users/create
 Content-Type: application/json
 
 {
+  "keycloakId": "12345",
+  "role": "CUSTOMER",
+  "username": "jamielynn",
   "email": "jamielynn@yahoo.com",
   "password": "password",
   "firstName": "Jamie",
@@ -18,7 +21,7 @@ POST http://localhost:4002/users/315459f2-7888-48e5-ab26-003733e93a4f/role/SHOP
 GET http://localhost:4002/users/debug-keycloak
 
 ### Delete a user
-DELETE http://localhost:4002/users/f8f54274-cf3b-4abe-9237-9ba60244f56d
+DELETE http://localhost:4002/api/users/delete-user/240c33fc-54cb-4ddd-92eb-c3e997f2b3e8
 
 ### Delete all users
 DELETE http://localhost:4002/users/reset-all

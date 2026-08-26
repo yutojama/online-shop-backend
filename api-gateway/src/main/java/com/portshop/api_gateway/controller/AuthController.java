@@ -81,17 +81,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public Mono<String> logout(ServerWebExchange exchange) {
-        return exchange.getSession()
-                .doOnNext(session ->
-                        logger.info("WebSession ID: {}", session.getId())
-                ).thenReturn("logout");
+    public Mono<Void> logout(WebSession session) {
+        return session.invalidate();
     }
 
     @PostMapping("/register")
     public Mono<ResponseEntity<?>> createUser(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
         return userService.createUser(registerRequestDTO, Role.CUSTOMER).flatMap(userId ->
-                        Mono.just(ResponseEntity.ok().body("User created successfully"+userId))
+                        Mono.just(ResponseEntity.ok().body("User created successfully: "+userId))
                 );
     }
 

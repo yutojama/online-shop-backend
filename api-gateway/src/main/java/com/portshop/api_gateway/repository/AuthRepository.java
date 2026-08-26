@@ -11,5 +11,7 @@ import java.util.UUID;
 public interface AuthRepository extends ReactiveCrudRepository<AuthSession, UUID> {
     Mono<AuthSession> getAuthSessionByKeycloakUserId(String keycloakUserId);
 
+    Mono<AuthSession> getAuthSessionByUsername(String username);
+
     Mono<AuthSession> getAuthSessionBySessionId(String sessionId);
 }

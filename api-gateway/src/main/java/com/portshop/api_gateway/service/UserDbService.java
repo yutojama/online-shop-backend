@@ -32,7 +32,8 @@ public class UserDbService {
                 .build();
 
         return webClient.post()
-                .uri("/api/users/create", userCreateRequestDTO)
+                .uri("/api/users/create")
+                .bodyValue(userCreateRequestDTO)
                 .retrieve()
                 .bodyToMono(String.class);
     }

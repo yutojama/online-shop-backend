@@ -61,14 +61,12 @@ public class KeycloakClientService {
                 .subscribeOn(Schedulers.boundedElastic());
 
         // get keycloak id from response
-        return responseMono.handle((response, sink) -> {
-            if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-                sink.error(new KeycloakCreateUserException("Could not create Keycloak user: " + String.valueOf(response.getStatus())));
-                return;
-            }
-            String location = response.getLocation().toString();
-            String kId = location.substring(location.lastIndexOf("/") + 1);
-            sink.next(kId);
+        return responseMono.map(response -> {
+                if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+                    throw new KeycloakCreateUserException("Could not create Keycloak user: " + String.valueOf(response.getStatus()));
+                }
+                String location = response.getLocation().toString();
+                return location.substring(location.lastIndexOf("/") + 1);
         });
 
     }
@@ -129,29 +127,35 @@ public class KeycloakClientService {
 
     public Mono<Void> deleteKeycloakUser(String keycloakUserId) {
         return Mono.fromRunnable(()->{
-            try (Response deleteResponse = kc
-                    .realm(realm)
-                    .users()
-                    .delete(keycloakUserId)) {
-                if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-                    throw new KeycloakDeleteFailedException("Could not delete Keycloak user: " + String.valueOf(deleteResponse.getStatus()));
-                }
-            }
+            deleteMethode(keycloakUserId);
         }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 
+    private void deleteMethode(String keycloakUserId) {
+        try (Response deleteResponse = kc
+                .realm(realm)
+                .users()
+                .delete(keycloakUserId)) {
+            if (deleteResponse.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+                throw new KeycloakDeleteFailedException("Could not delete Keycloak user: " + String.valueOf(deleteResponse.getStatus()));
+            }
+        }
+    }
+
     public Mono<Void> deleteAllKeycloakUsers() {
-        // keycloak users are paginated, so delete in batch
-        int batchSize = 100;
 
         return Mono.fromRunnable(()->{
+            // keycloak users are paginated, so delete in batch
+            int batchSize = 100;
             while (true){
                 List<UserRepresentation> users = kc
                         .realm(realm)
                         .users()
                         .list(0, batchSize);
                 if(users.isEmpty()){ break;}
-                users.forEach(user -> deleteKeycloakUser(user.getId()));
+                users.forEach(user -> {
+                    deleteMethode(user.getId());
+                });
             }
         }).subscribeOn(Schedulers.boundedElastic()).then();
 
