@@ -2,6 +2,7 @@ package com.portshop.api_gateway.controller;
 
 import com.portshop.api_gateway.data.DataAgent;
 import com.portshop.api_gateway.dto.RegisterRequestDTO;
+import com.portshop.api_gateway.service.AuthDbService;
 import com.portshop.api_gateway.service.UserDbService;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
@@ -21,11 +22,13 @@ public class AdminController {
     private final DataAgent dataAgent;
     private final UserService userService;
     private final UserDbService userDbService;
+    private final AuthDbService authDbService;
 
-    public AdminController(DataAgent dataAgent, UserService userService, UserDbService userDbService) {
+    public AdminController(DataAgent dataAgent, UserService userService, UserDbService userDbService, AuthDbService authDbService) {
         this.dataAgent = dataAgent;
         this.userService = userService;
         this.userDbService = userDbService;
+        this.authDbService = authDbService;
     }
 
     /** this is the admin version to test if the web client could add valid token on request */
@@ -55,15 +58,21 @@ public class AdminController {
     }
 
     /** generate data */
-    @GetMapping("/generate-data")
+    @PostMapping("/generate/user-data")
     public Mono<ResponseEntity<?>> generateUserData(@RequestParam Integer shop, @RequestParam Integer cost) {
         return dataAgent.generateUserData(shop,cost).then(
-                dataAgent.generateAddressData().then(
-                        Mono.just(ResponseEntity.ok().body("Generate user data and address successfully"))
-                )
+                Mono.just(ResponseEntity.ok().body("Generate user data and address successfully"))
         );
     }
 
+
+    /** admin operation */
+    @DeleteMapping("/delete-user/{userId}")
+    public Mono<ResponseEntity<?>> deleteUser(@PathVariable String userId) {
+        return userService.deleteUser(userId).then(
+                Mono.just(ResponseEntity.ok().body("User deleted successfully: "+userId))
+        );
+    }
 
     @PostMapping("/{userId}/role/{role}")
     public Mono<ResponseEntity<?>> updateUserRole(@PathVariable String userId, @PathVariable Role role) {
@@ -72,10 +81,9 @@ public class AdminController {
         );
     }
 
-    @DeleteMapping("/delete-user/{userId}")
-    public Mono<ResponseEntity<?>> deleteUser(@PathVariable String userId) {
-        return userService.deleteUser(userId).then(
-                Mono.just(ResponseEntity.ok().body("User deleted successfully: "+userId))
-        );
+    @DeleteMapping("/clear-auth-session")
+    public Mono<ResponseEntity<?>> clearAuthSession() {
+        return authDbService.deleteAll()
+                .thenReturn(ResponseEntity.ok().body("Auth session cleared successfully"));
     }
 }

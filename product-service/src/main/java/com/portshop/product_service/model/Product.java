@@ -28,6 +28,9 @@ public class Product {
     private UUID id;
 
     @Column(nullable = false)
+    private String shopKeycloakId;
+
+    @Column(nullable = false)
     private String brand;
 
     @Enumerated(EnumType.STRING)

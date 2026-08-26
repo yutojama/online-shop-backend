@@ -59,6 +59,14 @@ public class ProductService {
 
     }
 
+    public Boolean verifyProduct(UUID userId, String kcId) {
+        Optional<Product> product = productRepository.getProductById(userId);
+        if(product.isPresent()) {
+            return product.get().getShopKeycloakId().equals(kcId);
+        }
+        throw new ProductNotFoundException("Product not found with ID: " + userId);
+    }
+
     public void deleteAllProducts() {
         productRepository.deleteAll();
     }

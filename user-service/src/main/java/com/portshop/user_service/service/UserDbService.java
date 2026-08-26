@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDbService {
@@ -84,6 +85,16 @@ public class UserDbService {
             return apiUser.get();
         }else {
             throw new ApiUserNotFoundException("User not found, keycloakUserId: "+keycloakUserId);
+        }
+    }
+
+    /** get kcId of specific type of users */
+    public List<String> getApiUserByRole(Role role) {
+        List<ApiUser> apiUsers = userRepository.getApiUserByRole(role);
+        if(apiUsers.isEmpty()) {
+            throw new ApiUserNotFoundException("User not found, role: "+role);
+        }else {
+            return apiUsers.stream().map(ApiUser::getKeycloakUserId).collect(Collectors.toList());
         }
     }
 

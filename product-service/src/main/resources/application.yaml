@@ -13,3 +13,7 @@ server:
 logging:
   level:
     root: info
+
+app:
+  user-service:
+    url: ${USER_SERVICE_URL}

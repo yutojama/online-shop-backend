@@ -67,6 +67,8 @@ public class ItemController {
         return  ResponseEntity.ok().body(itemResponseDTO);
     }
 
+
+    /** data handling from here */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/import-data")
     public ResponseEntity<?> importData(@RequestBody List<ItemImportRequestDTO> itemImportRequestDTOS){
@@ -79,6 +81,13 @@ public class ItemController {
                 .build()).toList();
         itemService.addItems(items);
         return ResponseEntity.ok().body("Import data successfully");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> deleteAll(){
+        itemService.deleteAll();
+        return ResponseEntity.ok().body("Delete all items successfully");
     }
 
 }

@@ -1,5 +1,5 @@
 ### GET product
-GET http://localhost:4000/api/products/get-prod/4c1c0756-898d-4104-a57d-352dcdd4c47e
+GET http://localhost:4000/api/products/get-prod/bc2347af-847a-45bf-af37-5b2905da397b
 
 ### Create product
 POST http://localhost:4000/api/products/create-prod
@@ -18,9 +18,17 @@ Content-Type: application/json
 }
 
 ### Delete product
-DELETE http://localhost:4000/api/products/delete-prod/29ee7dc7-1d94-4d5b-974e-a59f8a8c5b21
+DELETE http://localhost:4000/api/products/delete-prod/0e3550b5-560f-4a9d-b660-e05dca2900b3
 
 
 
 ### GET item
 GET http://localhost:4000/api/items/get-item/3712f4e4-ca3a-4e4b-a7a2-f50e9c44185e
+
+
+
+### Delete all products
+DELETE http://localhost:4000/api/products/delete-all
+
+### Delete all items
+DELETE http://localhost:4000/api/items/delete-all

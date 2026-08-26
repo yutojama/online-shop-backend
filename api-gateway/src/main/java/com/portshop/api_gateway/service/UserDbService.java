@@ -1,8 +1,10 @@
 package com.portshop.api_gateway.service;
 
+import com.portshop.api_gateway.dto.LoginRequestDTO;
 import com.portshop.api_gateway.dto.RegisterRequestDTO;
 import com.portshop.api_gateway.dto.UserCreateRequestDTO;
 import com.portshop.api_gateway.userEnum.Role;
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,9 +15,11 @@ import reactor.core.publisher.Mono;
 public class UserDbService {
 
     private final WebClient webClient;
+    private final KeycloakAuthService keycloakAuthService;
 
-    public UserDbService(@Qualifier("userServiceWebClient") WebClient webClient) {
+    public UserDbService(@Qualifier("userServiceWebClient") WebClient webClient, KeycloakAuthService keycloakAuthService) {
         this.webClient = webClient;
+        this.keycloakAuthService = keycloakAuthService;
     }
 
     // return user id
@@ -31,11 +35,19 @@ public class UserDbService {
                 .username(registerRequestDTO.resolveUsername())
                 .build();
 
-        return webClient.post()
+        Mono<AccessTokenResponse> accessTokenMono = keycloakAuthService.getAccessToken(
+                LoginRequestDTO.builder()
+                        .username(registerRequestDTO.resolveUsername())
+                        .password(registerRequestDTO.getPassword())
+                        .build()
+        );
+
+        return accessTokenMono.flatMap(token -> webClient.post()
                 .uri("/api/users/create")
+                .headers(headers -> headers.setBearerAuth(token.getToken()))
                 .bodyValue(userCreateRequestDTO)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(String.class));
     }
 
     // this is the admin version to test if the web client could add valid token on request
@@ -75,4 +87,5 @@ public class UserDbService {
                 .retrieve()
                 .bodyToMono(String.class).then();
     }
+
 }

@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductMapper {
 
-    public Product ProductRequestDTOToProduct(ProductRequestDTO productRequestDTO){
+    public Product ProductRequestDTOToProduct(ProductRequestDTO productRequestDTO, String kcId){
         return Product.builder()
+                .shopKeycloakId(kcId)
                 .brand(productRequestDTO.getBrand())
                 .category(productRequestDTO.getCategory())
                 .gender(productRequestDTO.getGender())

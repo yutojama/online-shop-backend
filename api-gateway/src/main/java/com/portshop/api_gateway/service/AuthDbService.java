@@ -95,4 +95,8 @@ public class AuthDbService {
                 });
     }
 
+    public Mono<Void> deleteAll() {
+        return authRepository.deleteAll();
+    }
+
 }

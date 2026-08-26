@@ -33,7 +33,8 @@ public class SecurityConfig {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/users/create").permitAll()
+//                        .requestMatchers("/api/users/create").permitAll()
+                        .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
 

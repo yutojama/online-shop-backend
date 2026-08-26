@@ -39,9 +39,6 @@ public class UserService {
                                         .onErrorResume(e -> keycloakClientService.deleteKeycloakUser(kcId).then(Mono.error(e)))
                         )
         );
-
-
-
     }
 
     public Mono<Void> updateUserRole(String userId, Role role) {

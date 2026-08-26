@@ -5,7 +5,9 @@ import com.portshop.api_gateway.service.UserDbService;
 import com.portshop.api_gateway.service.UserService;
 import com.portshop.api_gateway.userEnum.Role;
 import net.datafaker.Faker;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -58,11 +60,8 @@ public class DataAgent {
         return registerRequestDTOList;
     }
 
-    public Mono<Void> generateAddressData() {
-        return Mono.empty();
-    }
-
     public Mono<Void> deleteAllUsers() {
         return userService.deleteAllUsers();
     }
+
 }

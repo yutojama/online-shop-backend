@@ -7,6 +7,8 @@ import com.portshop.user_service.userEnum.Role;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserDbController {
@@ -32,9 +34,15 @@ public class UserDbController {
         return userDbService.getRole(userId);
     }
 
-    @GetMapping("/get-user/{keycloakId}")
-    public ApiUser getUser(@PathVariable String keycloakId) {
+    @GetMapping("/get-user/by-kcId/{keycloakId}")
+    public ApiUser getUserByKcId(@PathVariable String keycloakId) {
         return userDbService.getApiUserByKeycloakId(keycloakId);
+    }
+
+    /** returns a list of keycloak id */
+    @GetMapping("/get-user/by-role/{role}")
+    public List<String> getUserByRole(@PathVariable Role role) {
+        return userDbService.getApiUserByRole(role);
     }
 
     @DeleteMapping("/delete-user/{userId}")

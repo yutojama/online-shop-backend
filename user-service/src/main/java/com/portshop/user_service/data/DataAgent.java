@@ -29,6 +29,11 @@ public class DataAgent {
     public void generateAddressData() {
         List<ApiUser> users = userDbService.getAllUsers();
         users.forEach(user -> {
+            // generate no address for admin user
+            if(user.getFirstName().equals("admin")){
+                return;
+            }
+            // generate max. 3 addresses each user
             for (int i = 0; i < 3; i++) {
                 if(ThreadLocalRandom.current().nextBoolean()){
                     AddressCreateRequestDTO addressCreateRequestDTO = AddressCreateRequestDTO.builder()
@@ -43,6 +48,15 @@ public class DataAgent {
                     addressService.saveAddress(addressCreateRequestDTO);
                 }
             }
+        });
+    }
+
+    public void deleteAddressData() {
+        List<ApiUser> users = userDbService.getAllUsers();
+        users.forEach(user -> {
+            if(user.getFirstName().equals("admin")){return;}
+            user.getAddresses().clear();
+            userDbService.saveApiUser(user);
         });
     }
 
