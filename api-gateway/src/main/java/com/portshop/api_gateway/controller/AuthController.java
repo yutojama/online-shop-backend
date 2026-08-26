@@ -55,15 +55,16 @@ public class AuthController {
 
         // save jwt and session ID in auth db
         Mono<AccessTokenResponse> accessTokenResponseMono = keycloakAuthService.getAccessToken(loginRequestDTO);
-        Mono<String> keycloakId = accessTokenResponseMono.map(keycloakAuthService::getKeycloakId);
-        Mono<String> authSessionId = Mono.zip(sessionId, keycloakId, accessTokenResponseMono)
+        String username = loginRequestDTO.getUsername();
+        Mono<String> kcId = accessTokenResponseMono.map(keycloakAuthService::getKeycloakId);
+        Mono<String> authSessionId = Mono.zip(sessionId, accessTokenResponseMono)
                 .flatMap(tuple -> authDbService.saveAuthSession(
-                        tuple.getT1(), tuple.getT2(), tuple.getT3()
+                        tuple.getT1(), username, tuple.getT2()
                 ));
 
         // create Authentication
         Mono<String> roleMono = accessTokenResponseMono.map(keycloakAuthService::getKeycloakRole);
-        Mono<Authentication> authenticationMono = Mono.zip(keycloakId, roleMono)
+        Mono<Authentication> authenticationMono = Mono.zip(kcId, roleMono)
                 .map(tuple ->
                         new UsernamePasswordAuthenticationToken(tuple.getT1(), null, List.of(new SimpleGrantedAuthority("ROLE_" + tuple.getT2())))
                 );
@@ -81,8 +82,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public Mono<Void> logout(WebSession session) {
-        return session.invalidate();
+    public Mono<String> logout(WebSession session) {
+        return session.invalidate()
+                .then(Mono.just("Logout successful"));
     }
 
     @PostMapping("/register")

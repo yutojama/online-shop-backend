@@ -24,29 +24,34 @@ public class AuthDbService {
     }
 
     // return authSession id
-    public Mono<String> saveAuthSession(String sessionId, String keycloakId, AccessTokenResponse accessTokenResponse) {
+    public Mono<String> saveAuthSession(String sessionId, String username, AccessTokenResponse accessTokenResponse) {
 
-        return authRepository.getAuthSessionByKeycloakUserId(keycloakId)
-                .flatMap(authSession->{
-                    if (authSession == null) {
-                        authSession = AuthSession.builder()
-                                .sessionId(sessionId)
-                                .keycloakUserId(keycloakId)
-                                .accessToken(accessTokenResponse.getToken())
-                                .refreshToken(accessTokenResponse.getRefreshToken())
-                                .accessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()))
-                                .refreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()))
-                                .build();
-                    } else {
-                        authSession.setSessionId(sessionId);
-                        authSession.setAccessToken(accessTokenResponse.getToken());
-                        authSession.setRefreshToken(accessTokenResponse.getRefreshToken());
-                        authSession.setAccessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()));
-                        authSession.setRefreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()));
-                    }
+        String keycloakId = keycloakAuthService.getKeycloakId(accessTokenResponse);
+
+        return authRepository.getAuthSessionByUsername(username)
+                .flatMap(authSession -> {
+                    authSession.setSessionId(sessionId);
+                    authSession.setKeycloakUserId(keycloakId);
+                    authSession.setAccessToken(accessTokenResponse.getToken());
+                    authSession.setRefreshToken(accessTokenResponse.getRefreshToken());
+                    authSession.setAccessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()));
+                    authSession.setRefreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()));
                     return authRepository.save(authSession)
-                            .map(session -> session.getId().toString());
-                });
+                            .map(AuthSession::getSessionId);
+                })
+                .switchIfEmpty(Mono.defer(()->{
+                    AuthSession authSession = AuthSession.builder()
+                            .sessionId(sessionId)
+                            .username(username)
+                            .keycloakUserId(keycloakId)
+                            .accessToken(accessTokenResponse.getToken())
+                            .refreshToken(accessTokenResponse.getRefreshToken())
+                            .accessTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getExpiresIn()))
+                            .refreshTokenExpiresAt(Instant.now().plusSeconds(accessTokenResponse.getRefreshExpiresIn()))
+                            .build();
+                    return authRepository.save(authSession)
+                            .map(AuthSession::getSessionId);
+                }));
     }
 
     public Mono<String> getAccessToken(String keycloakId) {

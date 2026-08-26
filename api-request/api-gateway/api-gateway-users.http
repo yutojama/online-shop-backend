@@ -12,7 +12,7 @@ POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "jamielynn",
+  "username": "jamie_lynn",
   "password": "password"
 }
 
@@ -25,7 +25,7 @@ POST http://localhost:4000/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "jamielynn@yahoo.com",
+  "email": "jamie_lynn@yahoo.com",
   "password": "password",
   "firstName": "Jamie",
   "lastName": "Lynn",
@@ -38,10 +38,10 @@ Content-Type: application/json
 GET http://localhost:4000/admin/auth/me
 
 ### Update user role
-POST http://localhost:4000/admin/auth/67fdcddd-c373-4c26-af75-b3d1cd5534aa/role/CUSTOMER
+POST http://localhost:4000/admin/auth/23b0610a-3359-4837-88ff-42ffc5423fce/role/SHOP
 
 ### Delete specific user
-DELETE http://localhost:4000/admin/auth/delete-user/55370969-eb41-405d-8fe1-1b964e171856
+DELETE http://localhost:4000/admin/auth/delete-user/23b0610a-3359-4837-88ff-42ffc5423fce
 
 
 

@@ -46,21 +46,21 @@ public class KeycloakAuthService {
     }
 
     public Mono<AccessTokenResponse> getAccessToken(LoginRequestDTO loginRequestDTO) {
-        try {
-            return webClient.post()
-                    .uri(tokenUrl)
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(BodyInserters.fromFormData("client_id",clientId)
-                            .with("client_secret", clientSecret)
-                            .with("grant_type", "password")
-                            .with("username", loginRequestDTO.getUsername())
-                            .with("password", loginRequestDTO.getPassword())
-                    )
-                    .retrieve()
-                    .bodyToMono(AccessTokenResponse.class);
-        } catch (WebClientResponseException.BadRequest e) {
-            throw new InvalidKeycloakCredentialsException(e.getMessage());
-        }
+        return webClient.post()
+                .uri(tokenUrl)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("client_id",clientId)
+                        .with("client_secret", clientSecret)
+                        .with("grant_type", "password")
+                        .with("username", loginRequestDTO.getUsername())
+                        .with("password", loginRequestDTO.getPassword())
+                )
+                .retrieve()
+                .bodyToMono(AccessTokenResponse.class)
+
+                .onErrorMap(WebClientResponseException.BadRequest.class, e ->
+                        new InvalidKeycloakCredentialsException("Login failed, cannot get access token with credentials: " + e.getMessage())
+                );
     }
 
     public String getKeycloakId(AccessTokenResponse accessTokenResponse) {
@@ -68,10 +68,17 @@ public class KeycloakAuthService {
         return jwt.getSubject();
     }
 
+    public String getUsername(AccessTokenResponse accessTokenResponse) {
+        Jwt jwt = jwtDecoder.decode(accessTokenResponse.getToken());
+        return jwt.getClaims().get("preferred_username").toString();
+    }
+
     public String getKeycloakRole(AccessTokenResponse accessTokenResponse) {
         Jwt jwt = jwtDecoder.decode(accessTokenResponse.getToken());
         Map<String,Object> resourceAccess = jwt.getClaim("resource_access");
+        @SuppressWarnings("unchecked")
         Map<String,Object> portShopAdmin = (Map<String, Object>)resourceAccess.get("portshop-admin");
+        @SuppressWarnings("unchecked")
         List<String> roles = (List<String>)portShopAdmin.get("roles");
         return roles.getFirst();
     }
@@ -86,20 +93,6 @@ public class KeycloakAuthService {
                         .with("refresh_token", refreshToken))
                 .retrieve()
                 .bodyToMono(AccessTokenResponse.class);
-    }
-
-    public void logout(String refreshToken) {
-        webClient.post()
-                .uri(tokenUrl)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(
-                        BodyInserters.fromFormData("client_id", clientId)
-                                .with("client_secret", clientSecret)
-                                .with("refresh_token", refreshToken)
-                )
-                .retrieve()
-                .toBodilessEntity()
-                .block();
     }
 
 }
