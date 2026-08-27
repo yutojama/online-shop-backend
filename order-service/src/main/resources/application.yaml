@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: order-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/portshop-realm
+
+server:
+  port: 4003
+
+app:
+  user-service:
+    url: ${USER_SERVICE_URL}
+  product-service:
+    url: ${PRODUCT_SERVICE_URL}

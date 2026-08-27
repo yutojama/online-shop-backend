@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: shipping-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/portshop-realm
+
+server:
+  port: 4005
