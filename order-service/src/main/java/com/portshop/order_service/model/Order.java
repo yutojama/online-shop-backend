@@ -1,6 +1,7 @@
 package com.portshop.order_service.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class Order {
     private String userKeycloakId;
 
     @Column(nullable = false)
+    @Builder.Default
     private OrderStatus orderStatus = OrderStatus.PENDING;
 
     @Column(precision = 10, scale = 2, nullable = false)
@@ -46,12 +48,16 @@ public class Order {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal shippingCost;
 
+    @Column(nullable = false)
+    private Carrier carrier;
+
     @OneToMany(
             mappedBy = "order",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     @JsonManagedReference
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public void addOrderItem(OrderItem orderItem) {
@@ -64,18 +70,18 @@ public class Order {
             orphanRemoval = true
     )
     @JsonManagedReference
+    @Builder.Default
     private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
     public void addOrderStatusHistory(OrderStatusHistory orderStatusHistory) {
-        this.orderStatusHistories.add(orderStatusHistory);
+        orderStatusHistories.add(orderStatusHistory);
     }
 
-
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "shipping_address_id")
     private Address shippingAddress;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
 

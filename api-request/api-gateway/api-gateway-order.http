@@ -1,0 +1,75 @@
+// cart handling from here
+### Create user cart
+POST http://localhost:4000/api/carts/create
+
+### Get cart
+GET http://localhost:4000/api/carts/get-cart
+
+### Clear cart
+DELETE http://localhost:4000/api/carts/clear-cart
+
+
+
+// cart item handling from here
+### Add Item to cart 1
+POST http://localhost:4000/api/carts/add-item
+Content-Type: application/json
+
+{
+  "quantity": 1,
+  "size": "M",
+  "itemId": "0c053650-4e93-4917-aa00-afeafbc87e75",
+  "productId": "3a344c58-33b0-434d-b6bb-4ff4ecb5ce5f",
+  "productName": "Burton AK Gore-Tex 2L Swash Jacket Black Snowwear",
+  "image": "C:\\Softwares\\projects\\online-shop-frontend\\src\\data\\prod_001.jpg",
+  "unitPrice": 499,
+  "discountPrice": 399
+}
+
+### Add Item to cart 2
+POST http://localhost:4000/api/carts/add-item
+Content-Type: application/json
+
+{
+  "quantity": 2,
+  "size": "S",
+  "itemId": "8b6c153e-9403-4de8-9c3d-305dc9b3cb5c",
+  "productId": "f91f82d6-79b1-4250-9bfe-e3a553a4aef0",
+  "productName": "The North Face ThermoBall Snow Jacket White Winter Edition",
+  "image": "C:\\Softwares\\projects\\online-shop-frontend\\src\\data\\prod_002.jpg",
+  "unitPrice": 420,
+  "discountPrice": 335
+}
+
+### plus Item
+PATCH http://localhost:4000/api/carts/plus-item/9f6d7dea-f9a1-4f16-b926-32f4de288daf
+
+### minus Item
+PATCH http://localhost:4000/api/carts/minus-item/9f6d7dea-f9a1-4f16-b926-32f4de288daf
+
+
+
+// order handling from here
+### create order
+POST http://localhost:4000/api/orders/create
+Content-Type: application/json
+
+{
+  "carrier": "DHL",
+  "shippingAddress": {
+    "firstName": "Jamie",
+    "lastName": "Lynn",
+    "street": "90282 Gayle Ford",
+    "city": "Marquardtview",
+    "postalCode": "15230",
+    "country": "Sudan"
+  },
+  "billingAddress": {
+    "firstName": "Jamie",
+    "lastName": "Lynn",
+    "street": "252 Goyette Rest",
+    "city": "North Omerburgh",
+    "postalCode": "50873",
+    "country": "Andorra"
+  }
+}

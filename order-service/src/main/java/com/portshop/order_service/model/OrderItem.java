@@ -33,6 +33,9 @@ public class OrderItem {
     private Size size;
 
     @Column(nullable = false)
+    private String itemId;
+
+    @Column(nullable = false)
     private String productId;
 
     @Column(nullable = false)
@@ -45,12 +48,12 @@ public class OrderItem {
     private BigDecimal unitPrice;
 
     @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal totalPrice;
+    private BigDecimal discountPrice;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonBackReference
-    Order order;
+    private Order order;
 
 
     @CreationTimestamp

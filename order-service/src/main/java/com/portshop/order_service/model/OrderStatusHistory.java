@@ -28,7 +28,6 @@ public class OrderStatusHistory {
     private Order order;
 
 
-    @Column(nullable = false)
     private OrderStatus fromStatus;
 
     @Column(nullable = false)
