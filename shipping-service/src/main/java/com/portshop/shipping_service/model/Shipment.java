@@ -1,13 +1,17 @@
 package com.portshop.shipping_service.model;
 
 import com.portshop.shipping_service.shippingEnum.Carrier;
+import com.portshop.shipping_service.shippingEnum.ShipmentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -25,7 +29,16 @@ public class Shipment {
     private String orderId;
 
     @Column(nullable = false)
+    private String shopKeycloakId;
+
+    @Column(nullable = false)
+    private String orderShipmentId;
+
+    @Column(nullable = false)
     private Carrier carrier;
+
+    @Column(nullable = false)
+    private ShipmentStatus shipmentStatus;
 
     @Column(nullable = false)
     private String trackingNumber;
@@ -33,5 +46,13 @@ public class Shipment {
     private Instant shippedAt;
 
     private Instant deliveredAt;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
 }

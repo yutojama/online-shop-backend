@@ -38,4 +38,13 @@ public class GlobalExceptionHandler{
         errors.put("shipping", e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
+
+    @ExceptionHandler(ShippingExistingException.class)
+    public ResponseEntity<?> handleShippingExistingException(ShippingExistingException e){
+        logger.warn("Shipment already exists {}", e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("shipping", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }

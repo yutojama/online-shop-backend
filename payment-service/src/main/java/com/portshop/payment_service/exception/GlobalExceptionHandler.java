@@ -35,7 +35,23 @@ public class GlobalExceptionHandler{
     public ResponseEntity<?> handlePaymentNotFoundException(PaymentNotFoundException e){
         logger.warn("Payment not found {}", e.getMessage());
         Map<String, String> errors = new HashMap<>();
-        errors.put("payment", e.getMessage());
+        errors.put("Payment not found", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(PaymentExistingException.class)
+    public ResponseEntity<?> handlePaymentExistingException(PaymentExistingException e){
+        logger.warn("Payment already existing {}", e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Payment already existing", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(PaymentAuthenticationException.class)
+    public ResponseEntity<?> handlePaymentAuthenticationException(PaymentAuthenticationException e){
+        logger.warn("Authentication failed {}", e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Authentication failed", e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
 }

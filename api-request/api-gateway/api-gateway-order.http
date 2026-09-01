@@ -16,6 +16,7 @@ POST http://localhost:4000/api/carts/add-item
 Content-Type: application/json
 
 {
+  "shopKeycloakId": "e4440867-43e0-4faa-99e1-04109ed2223d",
   "quantity": 1,
   "size": "M",
   "itemId": "0c053650-4e93-4917-aa00-afeafbc87e75",
@@ -31,6 +32,7 @@ POST http://localhost:4000/api/carts/add-item
 Content-Type: application/json
 
 {
+  "shopKeycloakId": "2c6f47df-1919-484c-b444-33520095b287",
   "quantity": 2,
   "size": "S",
   "itemId": "8b6c153e-9403-4de8-9c3d-305dc9b3cb5c",
@@ -40,6 +42,23 @@ Content-Type: application/json
   "unitPrice": 420,
   "discountPrice": 335
 }
+
+### Add Item to cart 3
+POST http://localhost:4000/api/carts/add-item
+Content-Type: application/json
+
+{
+  "shopKeycloakId": "2c6f47df-1919-484c-b444-33520095b287",
+  "quantity": 1,
+  "size": "L",
+  "itemId": "727818f0-972d-4671-a097-40ce88cedc46",
+  "productId": "6cd08ade-0287-41a9-86e6-6820df4c1832",
+  "productName": "Smith I/O MAG Snow Goggles ChromaPop Lens",
+  "image": "C:\\Softwares\\projects\\online-shop-frontend\\src\\data\\prod_011.jpg",
+  "unitPrice": 250
+}
+
+
 
 ### plus Item
 PATCH http://localhost:4000/api/carts/plus-item/9f6d7dea-f9a1-4f16-b926-32f4de288daf
@@ -55,6 +74,7 @@ POST http://localhost:4000/api/orders/create
 Content-Type: application/json
 
 {
+  "paymentMethod": "PAYPAL",
   "carrier": "DHL",
   "shippingAddress": {
     "firstName": "Jamie",

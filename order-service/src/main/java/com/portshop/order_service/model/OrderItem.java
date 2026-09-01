@@ -26,6 +26,9 @@ public class OrderItem {
     private UUID id;
 
     @Column(nullable = false)
+    private String shopKeycloakId;
+
+    @Column(nullable = false)
     private Integer quantity;
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +50,7 @@ public class OrderItem {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2, nullable = true)
     private BigDecimal discountPrice;
 
     @ManyToOne
@@ -55,6 +58,10 @@ public class OrderItem {
     @JsonBackReference
     private Order order;
 
+    @ManyToOne
+    @JoinColumn(name = "shipment_id")
+    @JsonBackReference
+    private Shipment shipment;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

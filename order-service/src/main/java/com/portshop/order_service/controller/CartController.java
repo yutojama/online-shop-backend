@@ -73,6 +73,7 @@ public class CartController {
         String kcId = authentication.getName();
         Cart cart = cartService.getCart(kcId);
         CartItem cartItem = CartItem.builder()
+                .shopKeycloakId(addItemRequestDTO.getShopKeycloakId())
                 .quantity(addItemRequestDTO.getQuantity())
                 .size(addItemRequestDTO.getSize())
                 .itemId(addItemRequestDTO.getItemId())

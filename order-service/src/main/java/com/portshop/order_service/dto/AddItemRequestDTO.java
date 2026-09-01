@@ -17,6 +17,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class AddItemRequestDTO {
 
+    @NotNull(message = "Shop id is required for adding item")
+    private String shopKeycloakId;
+
     @NotNull(message = "Quantity is required for adding item")
     private Integer quantity;
 

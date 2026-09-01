@@ -23,6 +23,9 @@ public class CartItem {
     private UUID id;
 
     @Column(nullable = false)
+    private String shopKeycloakId;
+
+    @Column(nullable = false)
     private Integer quantity;
 
     @Enumerated(EnumType.STRING)
@@ -44,7 +47,7 @@ public class CartItem {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2, nullable = true)
     private BigDecimal discountPrice;
 
     @ManyToOne

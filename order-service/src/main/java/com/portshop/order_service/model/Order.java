@@ -3,6 +3,8 @@ package com.portshop.order_service.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
+import com.portshop.order_service.orderEnum.PaymentMethod;
+import com.portshop.order_service.orderEnum.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +38,9 @@ public class Order {
     @Builder.Default
     private OrderStatus orderStatus = OrderStatus.PENDING;
 
+    // this refers to the db id of payment service
+    private String paymentId;
+
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
@@ -47,6 +52,13 @@ public class Order {
 
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal shippingCost;
+
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Column(nullable = false)
     private Carrier carrier;
@@ -62,6 +74,19 @@ public class Order {
 
     public void addOrderItem(OrderItem orderItem) {
         this.orderItems.add(orderItem);
+    }
+
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonManagedReference
+    @Builder.Default
+    private List<Shipment> shipments = new ArrayList<>();
+
+    public void addShipment(Shipment shipment) {
+        this.shipments.add(shipment);
     }
 
     @OneToMany(

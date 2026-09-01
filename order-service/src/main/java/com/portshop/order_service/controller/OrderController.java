@@ -2,11 +2,12 @@ package com.portshop.order_service.controller;
 
 import com.portshop.order_service.dto.AddressRequestDTO;
 import com.portshop.order_service.dto.OrderShippingInfoRequestDTO;
-import com.portshop.order_service.model.Address;
-import com.portshop.order_service.model.Cart;
-import com.portshop.order_service.model.Order;
+import com.portshop.order_service.dto.orderDTO.OrderDTO;
+import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
+import com.portshop.order_service.orderEnum.PaymentMethod;
 import com.portshop.order_service.service.CartService;
+import com.portshop.order_service.service.KafkaOrderProducerService;
 import com.portshop.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +18,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
     private final CartService cartService;
     private final OrderService orderService;
+    private final KafkaOrderProducerService kafkaOrderProducerService;
 
-    public OrderController(CartService cartService, OrderService orderService) {
+    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService) {
         this.cartService = cartService;
         this.orderService = orderService;
+        this.kafkaOrderProducerService = kafkaOrderProducerService;
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -38,11 +43,15 @@ public class OrderController {
 
         String kcId = authentication.getName();
         Cart cart = cartService.getCart(kcId);
+
+        // return null if cart is empty
         if(cart.getCartItems().isEmpty()){
             return ResponseEntity.badRequest().body("Cart is empty");
         }
 
+        // create order
         Carrier carrier = orderShippingInfoRequestDTO.getCarrier();
+        PaymentMethod paymentMethod = orderShippingInfoRequestDTO.getPaymentMethod();
         AddressRequestDTO shippingAddressDTO =  orderShippingInfoRequestDTO.getShippingAddress();
         AddressRequestDTO billingAddressDTO =  orderShippingInfoRequestDTO.getBillingAddress();
 
@@ -64,14 +73,22 @@ public class OrderController {
                 .country(billingAddressDTO.getCountry())
                 .build();
 
-        Order order = orderService.createOrderFromCart(cart, carrier, shippingAddress, billingAddress);
-        Order orderWithHistory = orderService.createOrderHistory(order);
+        Order order = orderService.createOrderFromCart(cart, paymentMethod, carrier, shippingAddress, billingAddress);
+
+        // create shipments
+        Order orderWithShipment = orderService.createOrderShipment(order);
+
+        // create history
+        Order orderWithHistory = orderService.createOrderHistory(orderWithShipment);
+
+        OrderDTO orderDTO = orderService.getOrderDTO(orderWithHistory);
+
+        // publish order for payment
+        kafkaOrderProducerService.publishForOrderSubmit(orderDTO);
 
         // clear all items in cart
         cartService.clearCart(cart);
-
-        return ResponseEntity.ok().body(orderWithHistory);
-//        return ResponseEntity.ok().body("Order created successfully");
+        return ResponseEntity.ok().body(orderDTO);
 
     }
 

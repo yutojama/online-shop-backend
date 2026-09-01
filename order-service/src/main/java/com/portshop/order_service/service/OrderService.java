@@ -1,14 +1,23 @@
 package com.portshop.order_service.service;
 
+import com.portshop.order_service.dto.AddressRequestDTO;
 import com.portshop.order_service.dto.CartSumResponseDTO;
+import com.portshop.order_service.dto.orderDTO.OrderDTO;
+import com.portshop.order_service.dto.orderDTO.OrderItemDTO;
+import com.portshop.order_service.dto.orderDTO.OrderShipmentDTO;
+import com.portshop.order_service.exception.OrderNotFoundException;
 import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
+import com.portshop.order_service.orderEnum.PaymentMethod;
 import com.portshop.order_service.repository.OrderRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -21,7 +30,17 @@ public class OrderService {
         this.cartService = cartService;
     }
 
+
+    public Order getOrder(String orderId) {
+        Order order = orderRepository.getOrderById(UUID.fromString(orderId));
+        if(order == null){
+            throw new OrderNotFoundException(orderId);
+        }
+        return order;
+    }
+
     public Order createOrderFromCart(Cart cart,
+                                    PaymentMethod paymentMethod,
                                     Carrier carrier,
                                     Address shippingAddress,
                                     Address billingAddress
@@ -38,6 +57,7 @@ public class OrderService {
                 .total(cartSum.getTotal())
                 .tax(cartSum.getTax())
                 .shippingCost(cartSum.getShippingCost())
+                .paymentMethod(paymentMethod)
                 .carrier(carrier)
                 .shippingAddress(shippingAddress)
                 .billingAddress(billingAddress)
@@ -48,6 +68,8 @@ public class OrderService {
                 .forEach(cartItem ->
                     order.addOrderItem(
                             OrderItem.builder()
+                                    .order(order)
+                                    .shopKeycloakId(cartItem.getShopKeycloakId())
                                     .quantity(cartItem.getQuantity())
                                     .size(cartItem.getSize())
                                     .itemId(cartItem.getItemId())
@@ -61,6 +83,64 @@ public class OrderService {
                 );
         return orderRepository.save(order);
 
+    }
+
+    public Order createOrderShipment(Order order) {
+        List<Shipment> shipments = order.getShipments();
+        order.getOrderItems().forEach(orderItem -> {
+            // check if shipment with shop id already exists
+            Shipment existShipment = shipments.stream()
+                    .filter(spm ->
+                            spm.getShopKeycloakId()
+                                    .equals(orderItem.getShopKeycloakId())
+                    ).findFirst()
+                    .orElse(null);
+
+            if(existShipment == null){
+                Shipment shipment = Shipment.builder()
+                        .shopKeycloakId(orderItem.getShopKeycloakId())
+                        .carrier(order.getCarrier())
+                        .order(order)
+                        .build();
+                shipment.addOrderItem(orderItem);
+                shipments.add(shipment);
+            } else {
+                existShipment.addOrderItem(orderItem);
+            }
+        });
+
+        // set shipment id for orderItems
+        Order newOrder = orderRepository.save(order);
+        order.getShipments().forEach(shipment -> {
+            shipment.getOrderItems().forEach(orderItem -> {
+                orderItem.setShipment(shipment);
+            });
+        });
+
+        return orderRepository.save(newOrder);
+    }
+
+
+    /**
+     * methods for creating history logging and save order from here
+     **/
+
+    public Order saveOrder(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public Order saveOrderWithLog(Order order, String changedBy, String reason){
+        order.addOrderStatusHistory(
+                OrderStatusHistory.builder()
+                        .order(order)
+                        .fromStatus(order.getOrderStatus())
+                        .toStatus(order.getOrderStatus())
+                        .changedAt(Instant.now())
+                        .changedBy(changedBy)
+                        .reason(reason)
+                        .build()
+        );
+        return orderRepository.save(order);
     }
 
     public Order createOrderHistory(Order order) {
@@ -77,27 +157,29 @@ public class OrderService {
     }
 
     public Order confirmOrderHistory(Order order) {
+        order.setOrderStatus(OrderStatus.CONFIRMED);
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)
                         .fromStatus(OrderStatus.PENDING)
                         .toStatus(OrderStatus.CONFIRMED)
                         .changedAt(Instant.now())
-                        .changedBy("Shop")
-                        .reason("Order created")
+                        .changedBy("Payment service")
+                        .reason("Payment created")
                         .build()
         );
         return orderRepository.save(order);
     }
 
     public Order processOrderHistory(Order order) {
+        order.setOrderStatus(OrderStatus.PROCESSING);
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)
                         .fromStatus(OrderStatus.CONFIRMED)
                         .toStatus(OrderStatus.PROCESSING)
                         .changedAt(Instant.now())
-                        .changedBy("Shop")
+                        .changedBy("Shipping service")
                         .reason("Order in process")
                         .build()
         );
@@ -105,27 +187,29 @@ public class OrderService {
     }
 
     public Order shippingOrderHistory(Order order) {
+        order.setOrderStatus(OrderStatus.SHIPPED);
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)
                         .fromStatus(OrderStatus.PROCESSING)
                         .toStatus(OrderStatus.SHIPPED)
                         .changedAt(Instant.now())
-                        .changedBy("Carrier")
-                        .reason("Order shipped")
+                        .changedBy("Shipping service")
+                        .reason("Order in shipment")
                         .build()
         );
         return orderRepository.save(order);
     }
 
     public Order deliverOrderHistory(Order order) {
+        order.setOrderStatus(OrderStatus.DELIVERED);
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)
                         .fromStatus(OrderStatus.SHIPPED)
                         .toStatus(OrderStatus.DELIVERED)
                         .changedAt(Instant.now())
-                        .changedBy("Carrier")
+                        .changedBy("Shipping service")
                         .reason("Order delivered")
                         .build()
         );
@@ -133,6 +217,7 @@ public class OrderService {
     }
 
     public Order cancelOrderHistory(Order order, OrderStatus fromStatus) {
+        order.setOrderStatus(OrderStatus.CANCELLED);
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)
@@ -140,10 +225,68 @@ public class OrderService {
                         .toStatus(OrderStatus.CANCELLED)
                         .changedAt(Instant.now())
                         .changedBy("Customer")
-                        .reason("Order delivered")
+                        .reason("Order cancelled")
                         .build()
         );
         return orderRepository.save(order);
+    }
+
+    public OrderDTO getOrderDTO(Order order) {
+        OrderDTO orderDTO = OrderDTO.builder()
+                .orderId(order.getId().toString())
+                .userKeycloakId(order.getUserKeycloakId())
+                .orderStatus(order.getOrderStatus())
+                .subtotal(order.getSubtotal())
+                .total(order.getTotal())
+                .tax(order.getTax())
+                .shippingCost(order.getShippingCost())
+                .paymentMethod(order.getPaymentMethod())
+                .carrier(order.getCarrier())
+                .billingAddress(AddressRequestDTO.builder()
+                        .firstName(order.getBillingAddress().getFirstName())
+                        .lastName(order.getBillingAddress().getLastName())
+                        .street(order.getBillingAddress().getStreet())
+                        .city(order.getBillingAddress().getCity())
+                        .postalCode(order.getBillingAddress().getPostalCode())
+                        .country(order.getBillingAddress().getCountry())
+                        .build()
+                )
+                .shippingAddress(AddressRequestDTO.builder()
+                        .firstName(order.getShippingAddress().getFirstName())
+                        .lastName(order.getShippingAddress().getLastName())
+                        .street(order.getShippingAddress().getStreet())
+                        .city(order.getShippingAddress().getCity())
+                        .postalCode(order.getShippingAddress().getPostalCode())
+                        .country(order.getShippingAddress().getCountry())
+                        .build()
+                )
+                .build();
+
+        order.getShipments().forEach(shipment -> {
+            OrderShipmentDTO orderShipmentDTO = OrderShipmentDTO.builder()
+                    .shipmentId(shipment.getId().toString())
+                    .shopKeycloakId(shipment.getShopKeycloakId())
+                    .carrier(shipment.getCarrier())
+                    .trackingNumber(shipment.getTrackingNumber())
+                    .shipmentStatus(shipment.getShipmentStatus())
+                    .build();
+            shipment.getOrderItems().forEach(orderItem ->
+                    orderShipmentDTO.addOrderItemDTO(
+                            OrderItemDTO.builder()
+                            .itemId(orderItem.getId().toString())
+                            .productId(orderItem.getProductId())
+                            .productName(orderItem.getProductName())
+                            .quantity(orderItem.getQuantity())
+                            .size(orderItem.getSize())
+                            .unitPrice(orderItem.getUnitPrice())
+                            .discountPrice(orderItem.getDiscountPrice())
+                            .build()
+                    )
+            );
+            orderDTO.getOrderShipmentDTOList().add(orderShipmentDTO);
+        });
+
+        return orderDTO;
     }
 
 }

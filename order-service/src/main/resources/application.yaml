@@ -7,6 +7,27 @@ spring:
         jwt:
           issuer-uri: http://localhost:8081/realms/portshop-realm
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: "OrderDTO:com.portshop.order_service.dto.orderDTO.OrderDTO"
+
+    consumer:
+      group-id: order-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.type.mapping: >- 
+          PaymentDTO:com.portshop.order_service.dto.orderDTO.PaymentDTO,
+          ShipmentDTO:com.portshop.order_service.dto.orderDTO.ShipmentDTO
+        spring.json.trusted.packages: "com.portshop.order_service.dto.orderDTO"
+
+
 server:
   port: 4003
 
