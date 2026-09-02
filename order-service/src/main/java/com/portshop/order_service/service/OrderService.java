@@ -283,7 +283,7 @@ public class OrderService {
             shipment.getOrderItems().forEach(orderItem ->
                     orderShipmentDTO.addOrderItemDTO(
                             OrderItemDTO.builder()
-                            .itemId(orderItem.getId().toString())
+                            .itemId(orderItem.getItemId())
                             .productId(orderItem.getProductId())
                             .productName(orderItem.getProductName())
                             .quantity(orderItem.getQuantity())

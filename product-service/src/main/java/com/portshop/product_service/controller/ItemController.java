@@ -4,8 +4,11 @@ import com.portshop.product_service.dto.ItemImportRequestDTO;
 import com.portshop.product_service.dto.ItemMapper;
 import com.portshop.product_service.dto.ItemRequestDTO;
 import com.portshop.product_service.dto.ItemResponseDTO;
+import com.portshop.product_service.dto.orderDTO.ItemReservationDTO;
+import com.portshop.product_service.dto.orderDTO.OrderDTO;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
+import com.portshop.product_service.service.InventoryService;
 import com.portshop.product_service.service.ItemService;
 import com.portshop.product_service.service.ProductService;
 import jakarta.validation.Valid;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/items")
@@ -26,11 +30,13 @@ public class ItemController {
     private final ItemMapper itemMapper;
     private final ItemService itemService;
     private final ProductService productService;
+    private final InventoryService inventoryService;
 
-    public ItemController(ItemMapper itemMapper, ItemService itemService, ProductService productService) {
+    public ItemController(ItemMapper itemMapper, ItemService itemService, ProductService productService, InventoryService inventoryService) {
         this.itemMapper = itemMapper;
         this.itemService = itemService;
         this.productService = productService;
+        this.inventoryService = inventoryService;
     }
 
     // deprecated, will be deleted later
@@ -70,7 +76,30 @@ public class ItemController {
 
 
 
-    /** data handling from here */
+    /**
+     * inventory controller from here
+     * */
+    @PostMapping("/reserve-item")
+    public ResponseEntity<?> reserveItem(
+            @RequestBody OrderDTO orderDTO
+    ){
+        List<ItemReservationDTO> itemReservationDTOs = inventoryService.reserveItem(orderDTO);
+        return ResponseEntity.ok().body(itemReservationDTOs);
+    }
+
+    @GetMapping("/cancel-item/{orderId}")
+    public ResponseEntity<?> cancelItem(
+            @PathVariable String orderId
+    ){
+        inventoryService.cancelItemReservation(orderId);
+        return ResponseEntity.ok().body("Cancel item reservation successfully");
+    }
+
+
+
+    /**
+     * data handling from here
+     * */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/import-data")
     public ResponseEntity<?> importData(@RequestBody List<ItemImportRequestDTO> itemImportRequestDTOS){

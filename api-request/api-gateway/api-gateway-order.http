@@ -33,7 +33,7 @@ Content-Type: application/json
 
 {
   "shopKeycloakId": "2c6f47df-1919-484c-b444-33520095b287",
-  "quantity": 2,
+  "quantity": 1,
   "size": "S",
   "itemId": "8b6c153e-9403-4de8-9c3d-305dc9b3cb5c",
   "productId": "f91f82d6-79b1-4250-9bfe-e3a553a4aef0",
@@ -95,4 +95,4 @@ Content-Type: application/json
 }
 
 ### cancel order
-DELETE http://localhost:4000/api/orders/cancel/d2b7bf4f-4a2e-4319-9bf8-f0d904fe4b59
+DELETE http://localhost:4000/api/orders/cancel/637bab08-6145-403c-8bc9-e9f30e9fbd01

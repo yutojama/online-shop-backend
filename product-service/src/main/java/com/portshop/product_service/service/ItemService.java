@@ -43,6 +43,10 @@ public class ItemService {
         items.forEach(this::addItem);
     }
 
+    public void saveItem(Item item){
+        itemRepository.save(item);
+    }
+
     /* get item */
     public Item getItem(UUID id){
         Optional<Item> item = itemRepository.findById(id);

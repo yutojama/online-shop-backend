@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ItemReservationRepository extends JpaRepository<ItemReservation, UUID> {
     List<ItemReservation> getItemReservationByOrderId(String orderId);
+
 }

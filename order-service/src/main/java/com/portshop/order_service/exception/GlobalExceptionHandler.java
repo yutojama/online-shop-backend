@@ -71,4 +71,10 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(ItemReservationException.class)
+    public ResponseEntity<?> handleItemReservationException(ItemReservationException e){
+        logger.warn(e.getMessage());
+        return ResponseEntity.badRequest().body(e.getItemReservation());
+    }
+
 }

@@ -2,18 +2,22 @@ package com.portshop.order_service.controller;
 
 import com.portshop.order_service.dto.AddressRequestDTO;
 import com.portshop.order_service.dto.OrderShippingInfoRequestDTO;
+import com.portshop.order_service.dto.orderDTO.ItemReservationDTO;
 import com.portshop.order_service.dto.orderDTO.OrderDTO;
+import com.portshop.order_service.exception.ItemReservationException;
 import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
 import com.portshop.order_service.orderEnum.PaymentMethod;
 import com.portshop.order_service.service.CartService;
+import com.portshop.order_service.service.InventoryService;
 import com.portshop.order_service.service.KafkaOrderProducerService;
 import com.portshop.order_service.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,15 +29,18 @@ public class OrderController {
     private final CartService cartService;
     private final OrderService orderService;
     private final KafkaOrderProducerService kafkaOrderProducerService;
+    private final InventoryService inventoryService;
 
-    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService) {
+    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService, InventoryService inventoryService) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.kafkaOrderProducerService = kafkaOrderProducerService;
+        this.inventoryService = inventoryService;
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<?> createOrder(
             Authentication authentication,
             @Valid @RequestBody OrderShippingInfoRequestDTO orderShippingInfoRequestDTO
@@ -79,13 +86,23 @@ public class OrderController {
         // create history
         Order orderWithHistory = orderService.createOrderHistory(orderWithShipment);
 
+        // create order DTO
         OrderDTO orderDTO = orderService.getOrderDTO(orderWithHistory);
+
+        // check inventory
+        List<ItemReservationDTO> itemReservationDTOs = inventoryService.reserveItem(orderDTO);
+        List<String> messageList = itemReservationDTOs.stream().map(ItemReservationDTO::getMessage).toList();
+        boolean ifReject = messageList.stream().anyMatch(message->message.contains("REJECTED"));
+        if(ifReject){
+            throw new ItemReservationException("Item reservation rejected", itemReservationDTOs);
+        }
 
         // publish order for payment
         kafkaOrderProducerService.publishForOrderSubmit(orderDTO);
 
         // clear all items in cart
         cartService.clearCart(cart);
+
         return ResponseEntity.ok().body(orderDTO);
 
     }
@@ -100,13 +117,8 @@ public class OrderController {
         String kcId = authentication.getName();
         orderService.checkOrderAuth(order, kcId);
         Order savedOrder = orderService.cancelOrderHistory(order, OrderStatus.PENDING);
-        kafkaOrderProducerService.publishForOrderSubmit(
-                OrderDTO.builder()
-                        .orderId(orderId)
-                        .orderStatus(savedOrder.getOrderStatus())
-                        .build()
-        );
-        return ResponseEntity.ok().body("Order deleted, orderId: "+orderId);
+        String cancelMessage =  inventoryService.cancelItemReservation(savedOrder.getId().toString());
+        return ResponseEntity.ok().body(cancelMessage + ", orderId: "+orderId);
     }
 
 }
