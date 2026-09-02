@@ -4,6 +4,7 @@ import com.portshop.shipping_service.dto.PaymentDTO;
 import com.portshop.shipping_service.dto.ShipmentDTO;
 import com.portshop.shipping_service.dto.orderDTO.OrderDTO;
 import com.portshop.shipping_service.model.Shipment;
+import com.portshop.shipping_service.shippingEnum.OrderStatus;
 import com.portshop.shipping_service.shippingEnum.PaymentStatus;
 import com.portshop.shipping_service.shippingEnum.ShipmentStatus;
 import org.slf4j.Logger;
@@ -36,30 +37,39 @@ public class KafkaShippingConsumerService {
     @Transactional
     public void listenForOrder(OrderDTO orderDTO) {
         // idempotency key to prevent double payment
-        shippingService.checkExistingShipment(orderDTO.getOrderId());
-        List<ShipmentDTO> shipmentDTOList = new ArrayList<>();
+        if(orderDTO.getOrderStatus().equals(OrderStatus.PENDING)){
+            shippingService.checkExistingShipment(orderDTO.getOrderId());
+            List<ShipmentDTO> shipmentDTOList = new ArrayList<>();
 
-        orderDTO.getOrderShipmentDTOList().forEach(orderShipment -> {
-            Shipment shipment = Shipment.builder()
-                    .orderId(orderDTO.getOrderId())
-                    .shopKeycloakId(orderShipment.getShopKeycloakId())
-                    .orderShipmentId(orderShipment.getShipmentId())
-                    .carrier(orderShipment.getCarrier())
-                    .shipmentStatus(ShipmentStatus.PENDING)
-                    .trackingNumber(UUID.randomUUID().toString())
-                    .build();
-            Shipment savedShipment = shippingService.saveShipment(shipment);
-            shipmentDTOList.add(
-                    ShipmentDTO.builder()
-                            .shipmentId(savedShipment.getOrderShipmentId())
-                            .orderId(savedShipment.getOrderId())
-                            .carrier(savedShipment.getCarrier())
-                            .shipmentStatus(savedShipment.getShipmentStatus())
-                            .trackingNumber(savedShipment.getTrackingNumber())
-                            .build()
-            );
-            logger.info("Incoming shipment, orderId: " + savedShipment.getOrderId() + ", shipmentId: " + savedShipment.getId());
-        });
+            orderDTO.getOrderShipmentDTOList().forEach(orderShipment -> {
+                Shipment shipment = Shipment.builder()
+                        .orderId(orderDTO.getOrderId())
+                        .shopKeycloakId(orderShipment.getShopKeycloakId())
+                        .orderShipmentId(orderShipment.getShipmentId())
+                        .carrier(orderShipment.getCarrier())
+                        .shipmentStatus(ShipmentStatus.PENDING)
+                        .trackingNumber(UUID.randomUUID().toString())
+                        .build();
+                Shipment savedShipment = shippingService.saveShipment(shipment);
+                shipmentDTOList.add(
+                        ShipmentDTO.builder()
+                                .shipmentId(savedShipment.getOrderShipmentId())
+                                .orderId(savedShipment.getOrderId())
+                                .carrier(savedShipment.getCarrier())
+                                .shipmentStatus(savedShipment.getShipmentStatus())
+                                .trackingNumber(savedShipment.getTrackingNumber())
+                                .build()
+                );
+                logger.info("Incoming shipment, orderId: " + savedShipment.getOrderId() + ", shipmentId: " + savedShipment.getId());
+            });
+        } else if(orderDTO.getOrderStatus().equals(OrderStatus.CANCELLED)){
+            List<Shipment> shipments = shippingService.getShipmentsByOrderId(orderDTO.getOrderId());
+            shipments.forEach(shipment -> {
+                shipment.setShipmentStatus(ShipmentStatus.CANCELLED);
+                logger.info("Shipment cancelled, orderId: " + shipment.getOrderId() + ", shipmentId: " + shipment.getId());
+            });
+        }
+
     }
 
     @KafkaListener(

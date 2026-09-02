@@ -23,6 +23,14 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
+        logger.warn(e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Error", "Invalid request value");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<?> handleProductNotFoundException(ProductNotFoundException e){
         logger.warn("Product not found {}", e.getMessage());
@@ -39,11 +47,11 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
-        logger.warn(e.getMessage());
+    @ExceptionHandler(ItemReservationException.class)
+    public ResponseEntity<?> handleItemReservationException(ItemReservationException e){
+        logger.warn("ItemReservation issue: {}", e.getMessage());
         Map<String, String> errors = new HashMap<>();
-        errors.put("Error", "Invalid request value");
+        errors.put("itemReservation", e.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
 }

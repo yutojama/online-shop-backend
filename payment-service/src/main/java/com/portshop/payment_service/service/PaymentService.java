@@ -58,6 +58,14 @@ public class PaymentService {
         return payment;
     }
 
+    public Payment getPaymentByOrderId(String orderId) {
+        Payment payment = paymentRepository.getPaymentByOrderId(orderId);
+        if (payment == null) {
+            throw new PaymentNotFoundException("Payment not found, orderId: " + orderId);
+        }
+        return payment;
+    }
+
 
     /**
      * payment web service
@@ -96,7 +104,7 @@ public class PaymentService {
         if (payment.getTransactionId()==null){
             payment.setTransactionId(UUID.randomUUID().toString());
         }
-        payment.setPaymentStatus(PaymentStatus.CANCELED);
+        payment.setPaymentStatus(PaymentStatus.FAILED);
         payment.setPaidAt(null);
         Payment savedPayment = savePayment(payment);
         logger.info("Payment cancelled");

@@ -11,4 +11,6 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     Payment getPaymentById(UUID uuid);
 
     boolean existsPaymentByOrderId(String orderId);
+
+    Payment getPaymentByOrderId(String orderId);
 }

@@ -1,3 +1,2 @@
-DROP TABLE IF EXISTS item;
-DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS item_reservation;
 

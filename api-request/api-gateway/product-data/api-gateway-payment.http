@@ -1,8 +1,8 @@
 ### perform payment
-POST http://localhost:4000/api/payment/pay/1c9d590b-5294-416e-8bf0-2d2bc7c5e4fd
+POST http://localhost:4000/api/payment/pay/cabdf53c-977d-4715-8618-aa9751961088
 
 ### cancel payment
-POST http://localhost:4000/api/payment/cancel/82a4204c-9098-459f-bce9-e1c8ba2ec5f1
+POST http://localhost:4000/api/payment/cancel/fc4eb968-0f88-45cc-963a-56d2cadc221c
 
 ### redirect
 POST http://localhost:4000/api/payment/redirect/82a4204c-9098-459f-bce9-e1c8ba2ec5f1

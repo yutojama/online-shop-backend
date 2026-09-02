@@ -5,6 +5,7 @@ import com.portshop.order_service.dto.CartSumResponseDTO;
 import com.portshop.order_service.dto.orderDTO.OrderDTO;
 import com.portshop.order_service.dto.orderDTO.OrderItemDTO;
 import com.portshop.order_service.dto.orderDTO.OrderShipmentDTO;
+import com.portshop.order_service.exception.OrderAuthException;
 import com.portshop.order_service.exception.OrderNotFoundException;
 import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
@@ -120,14 +121,23 @@ public class OrderService {
         return orderRepository.save(newOrder);
     }
 
+    /**
+     * order db handling from here
+     **/
+    public Order saveOrder(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public void checkOrderAuth(Order order, String keycloakId) {
+        if(!order.getUserKeycloakId().equals(keycloakId)){
+            throw new OrderAuthException(" order id: "+order.getId());
+        }
+    }
+
 
     /**
      * methods for creating history logging and save order from here
      **/
-
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
-    }
 
     public Order saveOrderWithLog(Order order, String changedBy, String reason){
         order.addOrderStatusHistory(

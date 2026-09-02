@@ -93,3 +93,6 @@ Content-Type: application/json
     "country": "Andorra"
   }
 }
+
+### cancel order
+DELETE http://localhost:4000/api/orders/cancel/d2b7bf4f-4a2e-4319-9bf8-f0d904fe4b59

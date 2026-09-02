@@ -63,4 +63,12 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(OrderAuthException.class)
+    public ResponseEntity<?> handleOrderAuthException(OrderAuthException e){
+        logger.warn(e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Order not belonging to user {}", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }
