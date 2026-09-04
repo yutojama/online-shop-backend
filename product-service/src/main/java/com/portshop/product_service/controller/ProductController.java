@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
-@RequestMapping("/guest/products")
+@RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -29,20 +29,6 @@ public class ProductController {
         this.productMapper = productMapper;
         this.userService = userService;
     }
-
-
-    /**
-     * guest handling from here, accessible without login
-     * */
-    @GetMapping("/get-prods")
-    public ResponseEntity<?> getProducts(){
-        List<ProductResponseDTO> productResponseDTOList =
-                productService.findAll().stream().map(productMapper::ProductToProductResponseDTO).toList();
-        return ResponseEntity.ok(productResponseDTOList);
-    }
-
-
-
 
 
 
@@ -82,13 +68,6 @@ public class ProductController {
 
     }
 
-    @GetMapping("/get-prod/{id}")
-    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable String id){
-        Product product = productService.getProductById(UUID.fromString(id));
-        ProductResponseDTO productResponseDTO = productMapper.ProductToProductResponseDTO(product);
-        return ResponseEntity.ok().body(productResponseDTO);
-    }
-
     @PreAuthorize("hasAnyRole('SHOP')")
     @DeleteMapping("/delete-prod/{id}")
     public ResponseEntity<?> deleteProduct(
@@ -103,8 +82,6 @@ public class ProductController {
         }
         return ResponseEntity.ok().body("Delete failed: verify product failed");
     }
-
-
 
 
 

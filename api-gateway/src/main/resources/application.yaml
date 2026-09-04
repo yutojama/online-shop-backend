@@ -9,12 +9,12 @@ spring:
             - id: product-service-public
               uri: ${PRODUCT_SERVICE_URL}
               predicates:
-                - Path=/guest/products/**, /api/images/**
+                - Path=/public/**
 
             - id: product-service-private
               uri: ${PRODUCT_SERVICE_URL}
               predicates:
-                - Path=/api/products/**, /api/items/**, /admin/images/**
+                - Path=/api/**
               filters:
                 - JwtValidation
 

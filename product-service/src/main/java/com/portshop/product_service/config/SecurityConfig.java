@@ -33,12 +33,7 @@ public class SecurityConfig {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/products/get-prod/**").permitAll()
-                        .requestMatchers("/api/items/get-item/**").permitAll()
-
-                        .requestMatchers("/guest/products/**").permitAll()
-                        .requestMatchers("/guest/items/**").permitAll()
-                        .requestMatchers("/api/images/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
 
                         .anyRequest()
                         .authenticated()

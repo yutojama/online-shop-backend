@@ -20,7 +20,6 @@ import java.util.List;
 @CrossOrigin(origins = "${app.frontend.url}")
 public class ImageController {
 
-
     private final Path imageDirectory;
     private final ProductService productService;
 
@@ -32,7 +31,7 @@ public class ImageController {
         this.imageDirectory = Paths.get(imagePath).toAbsolutePath().normalize();
     }
 
-    @GetMapping("/api/images/{filename}")
+    @GetMapping("/public/images/{filename}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
             Path file = imageDirectory.resolve(filename).normalize();
@@ -74,7 +73,7 @@ public class ImageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @PatchMapping("/admin/images/change-paths")
+    @PatchMapping("/api/images/change-paths")
     public ResponseEntity<?> changePaths(@RequestBody ChangeImagePathRequestDTO requestDTO) {
         List<Product> products = productService.findAll();
         products.forEach(product -> {

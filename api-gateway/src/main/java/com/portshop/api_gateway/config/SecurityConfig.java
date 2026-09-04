@@ -33,9 +33,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers("/admin/auth/**").hasRole("ADMIN")
 
-                        .pathMatchers("/guest/products/**").permitAll()
-                        .pathMatchers("/guest/items/**").permitAll()
-                        .pathMatchers("api/images/**").permitAll()
+                        .pathMatchers("/public/**").permitAll()
 
                         .anyExchange()
                         .authenticated()

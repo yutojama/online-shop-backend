@@ -65,10 +65,10 @@ public class CartService {
 
         // calculate discount
         BigDecimal discount = subTotal.subtract(total);
-        BigDecimal tax = total.multiply(BigDecimal.valueOf(0.02));
+        BigDecimal tax = total.multiply(BigDecimal.valueOf(0.19));
 
         // define default tax and shipping cost
-        BigDecimal leastTaxFreeTotal = BigDecimal.valueOf(50);
+        BigDecimal leastShippingFreeTotal = BigDecimal.valueOf(50);
         BigDecimal shippingCostStandard = BigDecimal.valueOf(8);
 
         // calculate shipping cost
@@ -76,12 +76,12 @@ public class CartService {
         if(cart.getCartItems().isEmpty()){
             shippingCost = BigDecimal.ZERO;
         } else {
-            shippingCost = (total.compareTo(leastTaxFreeTotal) < 0)?
+            shippingCost = (total.compareTo(leastShippingFreeTotal) < 0)?
                     shippingCostStandard:BigDecimal.valueOf(0);
         }
 
         // calculate total
-        BigDecimal endTotal = total.add(tax).add(shippingCost);
+        BigDecimal endTotal = total.add(shippingCost);  //.add(tax);
 
         // get item list
         List<ItemShortResponseDTO> itemList = cart.getCartItems().stream()

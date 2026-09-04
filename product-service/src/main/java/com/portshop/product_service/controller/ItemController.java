@@ -62,14 +62,6 @@ public class ItemController {
         return ResponseEntity.ok().body("Add items successfully");
     }
 
-    @GetMapping("/get-item/{itemId}")
-    public ResponseEntity<?> getItem(@PathVariable String itemId){
-        Item item = itemService.getItem(UUID.fromString(itemId));
-        ItemResponseDTO itemResponseDTO = itemMapper.toItemResponseDTO(item);
-        return  ResponseEntity.ok().body(itemResponseDTO);
-    }
-
-
 
 
 
