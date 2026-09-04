@@ -27,6 +27,7 @@ GET http://localhost:4000/api/items/get-item/3712f4e4-ca3a-4e4b-a7a2-f50e9c44185
 
 
 
+
 ### Delete all products
 DELETE http://localhost:4000/api/products/delete-all
 

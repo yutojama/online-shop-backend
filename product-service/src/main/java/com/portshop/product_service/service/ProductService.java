@@ -42,10 +42,18 @@ public class ProductService {
         return productRepository.findAllByOrderByCreatedAtAsc();
     }
 
+    public List<Product> findAll() {
+        return productRepository.findAll();
+    }
+
 
     /* update product */
     public Product updateProduct(Product product) {
         return productRepository.save(product);
+    }
+
+    public void updateAll(List<Product> products) {
+        productRepository.saveAll(products);
     }
 
     /* delete product */

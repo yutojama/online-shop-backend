@@ -1,2 +1,1 @@
-DROP TABLE IF EXISTS item_reservation;
-
+DELETE FROM item_reservation;

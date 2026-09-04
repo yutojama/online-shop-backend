@@ -1,0 +1,27 @@
+### Add stock
+POST http://localhost:4000/api/items/add-item?itemId=0c053650-4e93-4917-aa00-afeafbc87e75
+    &quantity=5
+
+### Add stock
+POST http://localhost:4000/api/items/add-item?itemId=8b6c153e-9403-4de8-9c3d-305dc9b3cb5c
+    &quantity=5
+
+### Add stock
+POST http://localhost:4000/api/items/add-item?itemId=727818f0-972d-4671-a097-40ce88cedc46
+    &quantity=5
+
+
+//  "newPath": "C:\\Softwares\\projects\\online-shop-backend\\images"
+### Change image directory
+PATCH http://localhost:4000/admin/images/change-paths
+Content-Type: application/json
+
+{
+  "newPath": ""
+}
+
+### Get image
+GET http://localhost:4000/api/images/prod_020.webp
+
+### Get products
+GET http://localhost:4000/guest/products/get-prods

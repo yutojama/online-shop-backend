@@ -55,4 +55,12 @@ public class GlobalExceptionHandler{
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(ImageException.class)
+    public ResponseEntity<?> handleImageException(ImageException e){
+        logger.warn("Image issue: {}", e.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Image issue", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }

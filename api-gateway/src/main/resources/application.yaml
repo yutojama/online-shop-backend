@@ -6,17 +6,23 @@ spring:
       server:
         webflux:
           routes:
-            - id: product-service
+            - id: product-service-public
               uri: ${PRODUCT_SERVICE_URL}
               predicates:
-                - Path=/api/products/**, /api/items/**
+                - Path=/guest/products/**, /api/images/**
+
+            - id: product-service-private
+              uri: ${PRODUCT_SERVICE_URL}
+              predicates:
+                - Path=/api/products/**, /api/items/**, /admin/images/**
               filters:
                 - JwtValidation
 
             - id: user-service
               uri: ${USER_SERVICE_URL}
               predicates:
-                - Path=/api/users/**, /api/addresses/**, /admin/users/**
+#                 /api/users/** should be hidden for any visitors. It's accessible only for webClient from microservices
+                - Path=/api/addresses/**, /admin/users/**
               filters:
                 - JwtValidation
 
@@ -34,19 +40,14 @@ spring:
               filters:
                 - JwtValidation
 
-            - id: shipping-service
-              uri: ${SHIPPING_SERVICE_URL}
-              predicates:
-                - Path=/api/shipping/**
-              filters:
-                - JwtValidation
 
-            - id: notification-service
-              uri: ${NOTIFICATION_SERVICE_URL}
-              predicates:
-                - Path=/api/notification/**
-              filters:
-                - JwtValidation
+#            - id: shipping-service
+#              uri: ${SHIPPING_SERVICE_URL}
+#              predicates:
+#                - Path=/api/shipping/**
+#              filters:
+#                - JwtValidation
+
 
   security:
     oauth2:
@@ -68,8 +69,6 @@ app:
     url: ${PAYMENT_SERVICE_URL}
   shipping-service:
     url: ${SHIPPING_SERVICE_URL}
-  notification-service:
-    url: ${NOTIFICATION_SERVICE_URL}
 
 keycloak:
   token-url: ${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token

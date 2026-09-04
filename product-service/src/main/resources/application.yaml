@@ -7,19 +7,19 @@ spring:
         jwt:
           issuer-uri: http://localhost:8081/realms/portshop-realm
 
-  kafka:
-    bootstrap-servers: localhost:9092
-
-    consumer:
-      group-id: inventory-service-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.type.mapping: >-
-          PaymentDTO:com.portshop.product_service.dto.orderDTO.PaymentDTO,
-          OrderDTO:com.portshop.product_service.dto.orderDTO.OrderDTO
-        spring.json.trusted.packages: "com.portshop.product_service.dto"
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#
+#    consumer:
+#      group-id: inventory-service-group
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring.json.type.mapping: >-
+#          PaymentDTO:com.portshop.product_service.dto.orderDTO.PaymentDTO,
+#          OrderDTO:com.portshop.product_service.dto.orderDTO.OrderDTO
+#        spring.json.trusted.packages: "com.portshop.product_service.dto"
 
 server:
   port: 4001
@@ -31,3 +31,8 @@ logging:
 app:
   user-service:
     url: ${USER_SERVICE_URL}
+  frontend:
+    url: ${FRONTEND_URL}
+
+images:
+  uri: ${IMAGE_URI}

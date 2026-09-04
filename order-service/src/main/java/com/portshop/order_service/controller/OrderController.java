@@ -9,10 +9,8 @@ import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
 import com.portshop.order_service.orderEnum.PaymentMethod;
-import com.portshop.order_service.service.CartService;
-import com.portshop.order_service.service.InventoryService;
-import com.portshop.order_service.service.KafkaOrderProducerService;
-import com.portshop.order_service.service.OrderService;
+import com.portshop.order_service.repository.ItemChangeRecordRepository;
+import com.portshop.order_service.service.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,12 +28,16 @@ public class OrderController {
     private final OrderService orderService;
     private final KafkaOrderProducerService kafkaOrderProducerService;
     private final InventoryService inventoryService;
+    private final ItemChangeRecordRepository itemChangeRecordRepository;
+    private final ItemChangeRecordService itemChangeRecordService;
 
-    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService, InventoryService inventoryService) {
+    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService, InventoryService inventoryService, ItemChangeRecordRepository itemChangeRecordRepository, ItemChangeRecordService itemChangeRecordService) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.kafkaOrderProducerService = kafkaOrderProducerService;
         this.inventoryService = inventoryService;
+        this.itemChangeRecordRepository = itemChangeRecordRepository;
+        this.itemChangeRecordService = itemChangeRecordService;
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -86,6 +88,9 @@ public class OrderController {
         // create history
         Order orderWithHistory = orderService.createOrderHistory(orderWithShipment);
 
+        // create item history for shop searching
+        itemChangeRecordService.createItemHistoryByOrder(orderWithHistory);
+
         // create order DTO
         OrderDTO orderDTO = orderService.getOrderDTO(orderWithHistory);
 
@@ -117,7 +122,23 @@ public class OrderController {
         String kcId = authentication.getName();
         orderService.checkOrderAuth(order, kcId);
         Order savedOrder = orderService.cancelOrderHistory(order, OrderStatus.PENDING);
+
+        // add item history for shop searching
+        itemChangeRecordService.addItemHistoryByOrder(
+                savedOrder,
+                OrderStatus.PENDING,
+                OrderStatus.CANCELLED,
+                "Customer",
+                "Item order cancelled"
+        );
+
         String cancelMessage =  inventoryService.cancelItemReservation(savedOrder.getId().toString());
+        kafkaOrderProducerService.publishForOrderSubmit(
+                OrderDTO.builder()
+                        .orderStatus(OrderStatus.CANCELLED)
+                        .orderId(orderId)
+                        .build()
+        );
         return ResponseEntity.ok().body(cancelMessage + ", orderId: "+orderId);
     }
 

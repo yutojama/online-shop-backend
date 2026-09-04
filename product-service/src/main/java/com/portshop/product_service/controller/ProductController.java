@@ -6,9 +6,7 @@ import com.portshop.product_service.dto.ProductResponseDTO;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.ProductService;
 import com.portshop.product_service.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,7 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/guest/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -32,6 +30,25 @@ public class ProductController {
         this.userService = userService;
     }
 
+
+    /**
+     * guest handling from here, accessible without login
+     * */
+    @GetMapping("/get-prods")
+    public ResponseEntity<?> getProducts(){
+        List<ProductResponseDTO> productResponseDTOList =
+                productService.findAll().stream().map(productMapper::ProductToProductResponseDTO).toList();
+        return ResponseEntity.ok(productResponseDTOList);
+    }
+
+
+
+
+
+
+    /**
+     * customer & shop handling from here
+     * */
     // deprecated, will be deleted
     @PreAuthorize("hasAnyRole('SHOP')")
     @PostMapping("/create-prod")
@@ -87,7 +104,13 @@ public class ProductController {
         return ResponseEntity.ok().body("Delete failed: verify product failed");
     }
 
-    /** admin handling from here */
+
+
+
+
+    /**
+     * admin handling from here
+     * */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete-all")
     public ResponseEntity<?> deleteAllProducts(){

@@ -11,14 +11,14 @@ import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
 import com.portshop.order_service.orderEnum.PaymentMethod;
+import com.portshop.order_service.orderEnum.ShipmentStatus;
 import com.portshop.order_service.repository.OrderRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 @Service
 public class OrderService {
@@ -228,6 +228,9 @@ public class OrderService {
 
     public Order cancelOrderHistory(Order order, OrderStatus fromStatus) {
         order.setOrderStatus(OrderStatus.CANCELLED);
+        order.getShipments().forEach(shipment -> {
+            shipment.setShipmentStatus(ShipmentStatus.CANCELLED);
+        });
         order.addOrderStatusHistory(
                 OrderStatusHistory.builder()
                         .order(order)

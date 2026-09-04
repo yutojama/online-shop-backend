@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -21,7 +22,7 @@ public class InventoryService {
 
     public List<ItemReservationDTO> reserveItem(OrderDTO orderDTO){
         return webClient.post()
-                .uri("/api/items/reserve-item")
+                .uri("/inv/items/reserve-item")
                 .bodyValue(orderDTO)
                 .retrieve()
                 .bodyToFlux(ItemReservationDTO.class)
@@ -31,7 +32,7 @@ public class InventoryService {
 
     public String cancelItemReservation(String orderId){
         return webClient.get()
-                .uri("/api/items/cancel-item/"+orderId)
+                .uri("/inv/items/cancel-item/"+orderId)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

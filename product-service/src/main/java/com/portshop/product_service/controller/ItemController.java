@@ -4,14 +4,11 @@ import com.portshop.product_service.dto.ItemImportRequestDTO;
 import com.portshop.product_service.dto.ItemMapper;
 import com.portshop.product_service.dto.ItemRequestDTO;
 import com.portshop.product_service.dto.ItemResponseDTO;
-import com.portshop.product_service.dto.orderDTO.ItemReservationDTO;
-import com.portshop.product_service.dto.orderDTO.OrderDTO;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.InventoryService;
 import com.portshop.product_service.service.ItemService;
 import com.portshop.product_service.service.ProductService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/items")
@@ -39,17 +35,17 @@ public class ItemController {
         this.inventoryService = inventoryService;
     }
 
-    // deprecated, will be deleted later
+
+    /**
+     * customer & shop handling from here
+     * */
     @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
     @PostMapping("/add-item")
-    public ResponseEntity<?> addItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
-        Item item = Item.builder()
-                .quantity(itemRequestDTO.getQuantity())
-                .size(itemRequestDTO.getSize())
-                .product(productService.getProductById(UUID.fromString(itemRequestDTO.getProductId())))
-                .build();
-        Item savedItem = itemService.addItem(item);
-        return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(savedItem));
+    public ResponseEntity<?> addItem(@RequestParam String itemId, @RequestParam Integer quantity) {
+        Item item = itemService.getItem(UUID.fromString(itemId));
+        item.setQuantity(item.getQuantity() + quantity);
+        itemService.saveItem(item);
+        return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(item));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','SHOP')")
@@ -75,25 +71,6 @@ public class ItemController {
 
 
 
-
-    /**
-     * inventory controller from here
-     * */
-    @PostMapping("/reserve-item")
-    public ResponseEntity<?> reserveItem(
-            @RequestBody OrderDTO orderDTO
-    ){
-        List<ItemReservationDTO> itemReservationDTOs = inventoryService.reserveItem(orderDTO);
-        return ResponseEntity.ok().body(itemReservationDTOs);
-    }
-
-    @GetMapping("/cancel-item/{orderId}")
-    public ResponseEntity<?> cancelItem(
-            @PathVariable String orderId
-    ){
-        inventoryService.cancelItemReservation(orderId);
-        return ResponseEntity.ok().body("Cancel item reservation successfully");
-    }
 
 
 

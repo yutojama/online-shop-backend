@@ -14,16 +14,17 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 
 @Service
 public class KafkaOrderConsumerService {
 
     private final Logger logger = LoggerFactory.getLogger(KafkaOrderConsumerService.class);
     private final OrderService orderService;
+    private final ItemChangeRecordService itemChangeRecordService;
 
-    public KafkaOrderConsumerService(OrderService orderService) {
+    public KafkaOrderConsumerService(OrderService orderService, ItemChangeRecordService itemChangeRecordService) {
         this.orderService = orderService;
+        this.itemChangeRecordService = itemChangeRecordService;
     }
 
     @KafkaListener(
@@ -35,6 +36,15 @@ public class KafkaOrderConsumerService {
         logger.info("Received message, payment id: " + paymentDTO.getPaymentId());
         Order order = orderService.getOrder(paymentDTO.getOrderId());
         if(paymentDTO.getPaymentStatus()== PaymentStatus.PAID){
+            // add item history for shop searching
+            itemChangeRecordService.addItemHistoryByOrder(
+                    order,
+                    OrderStatus.PENDING,
+                    OrderStatus.CONFIRMED,
+                    "Payment service",
+                    "Item paid"
+            );
+
             order.setOrderStatus(OrderStatus.CONFIRMED);
             order.setPaymentId(paymentDTO.getPaymentId());
             Order savedOrder = orderService.confirmOrderHistory(order);
@@ -64,6 +74,14 @@ public class KafkaOrderConsumerService {
             shipment.setTrackingNumber(shipmentDTO.getTrackingNumber());
             shipment.setShipmentStatus(shipmentDTO.getShipmentStatus());
 
+            // add item history for shop searching
+            itemChangeRecordService.addItemHistoryByShipment(
+                    shipment,
+                    OrderStatus.CONFIRMED,
+                    OrderStatus.PROCESSING,
+                    "Shipping service",
+                    "Item processed by post"
+            );
 
             if(order.getOrderStatus() == OrderStatus.CONFIRMED){
                 order.setOrderStatus(OrderStatus.PROCESSING);
@@ -82,6 +100,15 @@ public class KafkaOrderConsumerService {
 
             shipment.setShipmentStatus(shipmentDTO.getShipmentStatus());
             shipment.setShippedAt(shipmentDTO.getShippedAt());
+
+            // add item history for shop searching
+            itemChangeRecordService.addItemHistoryByShipment(
+                    shipment,
+                    OrderStatus.PROCESSING,
+                    OrderStatus.SHIPPED,
+                    "Shipping service",
+                    "Item shipped by post"
+            );
 
             if(order.getOrderStatus() == OrderStatus.PROCESSING){
                 order.setOrderStatus(OrderStatus.SHIPPED);
@@ -102,6 +129,14 @@ public class KafkaOrderConsumerService {
             shipment.setDeliveredAt(shipmentDTO.getDeliveredAt());
             Order savedOrder = orderService.saveOrder(order);
 
+            // add item history for shop searching
+            itemChangeRecordService.addItemHistoryByShipment(
+                    shipment,
+                    OrderStatus.SHIPPED,
+                    OrderStatus.DELIVERED,
+                    "Shipping service",
+                    "Item delivered by post"
+            );
 
             // check orderStatus of all shipments are delivered
             boolean allSame = savedOrder.getShipments().stream().allMatch(spm -> spm.getShipmentStatus().equals(ShipmentStatus.DELIVERED));

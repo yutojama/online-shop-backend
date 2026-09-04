@@ -1,1 +1,1 @@
-DROP TABLE cart_item
+DROP TABLE item_change_history
