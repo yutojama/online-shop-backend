@@ -22,7 +22,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String userKeycloakId;
 
     @OneToMany(

@@ -19,6 +19,17 @@ import java.util.Optional;
 public class WebClientConfig {
 
     @Bean
+    public WebClient orderServiceWebClient(
+            @Value("${app.order-service.url}") String orderServiceUrl,
+            ExchangeFilterFunction bearerTokenFilter
+    ) {
+        return WebClient.builder()
+                .baseUrl(orderServiceUrl)
+                .filter(bearerTokenFilter)
+                .build();
+    }
+
+    @Bean
     public WebClient keycloakWebClient() {
         return WebClient.builder().build();
     }

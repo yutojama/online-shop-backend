@@ -46,12 +46,23 @@ public class KafkaOrderConsumerService {
             );
 
             order.setOrderStatus(OrderStatus.CONFIRMED);
+            order.setPaymentStatus(PaymentStatus.PAID);
             order.setPaymentId(paymentDTO.getPaymentId());
             Order savedOrder = orderService.confirmOrderHistory(order);
             logger.info("Status change to " + OrderStatus.CONFIRMED + ", order id: " + savedOrder.getId());
-        } else {
+        } else if(paymentDTO.getPaymentStatus()== PaymentStatus.FAILED) {
+            itemChangeRecordService.addItemHistoryByOrder(
+                    order,
+                    OrderStatus.PENDING,
+                    OrderStatus.PENDING,
+                    "Payment service",
+                    "Payment failed"
+            );
+
+            order.setPaymentStatus(PaymentStatus.FAILED);
             order.setPaymentId(paymentDTO.getPaymentId());
-            logger.info("Payment cancelled, order id: " + paymentDTO.getOrderId());
+            Order savedOrder = orderService.paymentFailedHistory(order);
+            logger.info("Payment failed, order id: " + savedOrder.getId());
         }
     }
 

@@ -16,6 +16,21 @@ Content-Type: application/json
   "password": "password"
 }
 
+### Login shop
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "allyson_pacocha",
+  "password": "password"
+}
+
+
+
+### Get me
+GET http://localhost:4000/api/users/get-me
+
+
 ### Logout user
 POST http://localhost:4000/api/auth/logout
 

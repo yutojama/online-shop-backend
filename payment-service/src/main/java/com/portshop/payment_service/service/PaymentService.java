@@ -70,20 +70,20 @@ public class PaymentService {
     /**
      * payment web service
      * */
-    public void redirectToPaymentProvider(String paymentId) {
-        logger.info("Redirecting to payment provider, paymentId: " + paymentId);
+    public void redirectToPaymentProvider(String orderId) {
+        logger.info("Redirecting to payment provider, order id: " + orderId);
     }
 
-    public void checkUserAuthentication(String paymentId, String kcId){
-        Payment payment = getPayment(paymentId);
+    public void checkUserAuthentication(String orderId, String kcId){
+        Payment payment = getPaymentByOrderId(orderId);
         if(!payment.getUserKeycloakId().equals(kcId)){
-            throw new PaymentAuthenticationException("Payment with id: " + paymentId + " not your payment");
+            throw new PaymentAuthenticationException("Order to pay with id: " + payment.getId() + " is not your payment");
         }
     }
 
-    public Payment pay(String paymentId) {
+    public Payment pay(String orderId) {
 
-        Payment payment = getPayment(paymentId);
+        Payment payment = getPaymentByOrderId(orderId);
 
         // placeholder for payment finished successfully
         if (payment.getTransactionId()==null){
@@ -96,9 +96,9 @@ public class PaymentService {
         return savedPayment;
     }
 
-    public Payment cancel(String paymentId) {
+    public Payment cancel(String orderId) {
 
-        Payment payment = getPayment(paymentId);
+        Payment payment = getPaymentByOrderId(orderId);
 
         // placeholder for payment finished successfully
         if (payment.getTransactionId()==null){

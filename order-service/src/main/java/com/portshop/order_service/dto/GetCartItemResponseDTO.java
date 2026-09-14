@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 public class GetCartItemResponseDTO {
 
     private String id;
+    private String shopId;
     private Integer quantity;
     private Size size;
     private String itemId;
@@ -23,5 +24,7 @@ public class GetCartItemResponseDTO {
     private String image;
     private BigDecimal unitPrice;
     private BigDecimal discountPrice;
+    private Integer daysOfDelivery;
+    private Integer available;
 
 }

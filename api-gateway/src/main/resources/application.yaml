@@ -9,20 +9,20 @@ spring:
             - id: product-service-public
               uri: ${PRODUCT_SERVICE_URL}
               predicates:
-                - Path=/public/**
+                - Path=/public/images/**, /public/products/**, /public/items/**
 
             - id: product-service-private
               uri: ${PRODUCT_SERVICE_URL}
               predicates:
-                - Path=/api/**
+                - Path=/api/products/**, /api/items/**,
               filters:
                 - JwtValidation
 
+#            /api/users/** should be hidden for any visitors. It's accessible only for webClient from microservices -> change from /api/users to /webClient/users
             - id: user-service
               uri: ${USER_SERVICE_URL}
               predicates:
-#                 /api/users/** should be hidden for any visitors. It's accessible only for webClient from microservices
-                - Path=/api/addresses/**, /admin/users/**
+                - Path=/api/addresses/**, /admin/users/**, /api/users/**
               filters:
                 - JwtValidation
 
@@ -72,3 +72,9 @@ app:
 
 keycloak:
   token-url: ${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: DEBUG
+    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: TRACE

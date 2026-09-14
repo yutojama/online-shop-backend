@@ -20,5 +20,6 @@ public class CartSumResponseDTO {
     private BigDecimal total;
     private BigDecimal tax;
     private BigDecimal shippingCost;
+    private BigDecimal shippingFreeTotal;
 
 }

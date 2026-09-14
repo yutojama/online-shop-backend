@@ -1,10 +1,5 @@
 package com.portshop.user_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.portshop.user_service.model.ApiUser;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

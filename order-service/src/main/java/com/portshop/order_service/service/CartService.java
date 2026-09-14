@@ -37,6 +37,10 @@ public class CartService {
         return cart;
     }
 
+    public Cart saveCart(Cart cart) {
+        return cartRepository.save(cart);
+    }
+
     public Cart getCart(String kcId) {
         Cart cart = cartRepository.findByUserKeycloakId(kcId);
         if (cart == null) {
@@ -68,7 +72,7 @@ public class CartService {
         BigDecimal tax = total.multiply(BigDecimal.valueOf(0.19));
 
         // define default tax and shipping cost
-        BigDecimal leastShippingFreeTotal = BigDecimal.valueOf(50);
+        BigDecimal leastShippingFreeTotal = BigDecimal.valueOf(70);
         BigDecimal shippingCostStandard = BigDecimal.valueOf(8);
 
         // calculate shipping cost
@@ -88,7 +92,10 @@ public class CartService {
                 .map(cartItem ->
                         ItemShortResponseDTO.builder()
                                 .productName(cartItem.getProductName())
+                                .price(cartItem.getUnitPrice())
                                 .quantity(cartItem.getQuantity())
+                                .image(cartItem.getImage())
+                                .size(cartItem.getSize())
                                 .build()
                 ).toList();
 
@@ -100,6 +107,7 @@ public class CartService {
                 .discount(discount.setScale(2, RoundingMode.HALF_UP))
                 .tax(tax.setScale(2, RoundingMode.HALF_UP))
                 .shippingCost(shippingCost.setScale(2, RoundingMode.HALF_UP))
+                .shippingFreeTotal(leastShippingFreeTotal.setScale(2, RoundingMode.HALF_UP))
                 .build();
     }
 

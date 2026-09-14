@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.keycloak.representations.AccessTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
@@ -38,11 +40,19 @@ public class AuthController {
     private final AuthDbService authDbService;
     private final ServerSecurityContextRepository serverSecurityContextRepository;
 
-    public AuthController(UserService userService, KeycloakAuthService keycloakAuthService, AuthDbService authDbService, ServerSecurityContextRepository serverSecurityContextRepository) {
+    private final WebClient webClient;
+
+    public AuthController(
+            UserService userService,
+            KeycloakAuthService keycloakAuthService,
+            AuthDbService authDbService,
+            ServerSecurityContextRepository serverSecurityContextRepository,
+            @Qualifier("orderServiceWebClient") WebClient webClient) {
         this.userService = userService;
         this.keycloakAuthService = keycloakAuthService;
         this.authDbService = authDbService;
         this.serverSecurityContextRepository = serverSecurityContextRepository;
+        this.webClient = webClient;
     }
 
     @PostMapping("/login")

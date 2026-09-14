@@ -9,6 +9,7 @@ import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
 import com.portshop.order_service.orderEnum.OrderStatus;
 import com.portshop.order_service.orderEnum.PaymentMethod;
+import com.portshop.order_service.orderEnum.PaymentStatus;
 import com.portshop.order_service.repository.ItemChangeRecordRepository;
 import com.portshop.order_service.service.*;
 import jakarta.validation.Valid;
@@ -38,6 +39,20 @@ public class OrderController {
         this.inventoryService = inventoryService;
         this.itemChangeRecordRepository = itemChangeRecordRepository;
         this.itemChangeRecordService = itemChangeRecordService;
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/get-order")
+    public ResponseEntity<?> getOrder(
+            Authentication authentication
+    ) {
+        String kcId = authentication.getName();
+        List<Order> orders = orderService.getOrdersByUserKeycloakId(kcId);
+        if (orders.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<OrderDTO> orderDTOs = orders.stream().map(orderService::getOrderDTO).toList();
+        return ResponseEntity.ok(orderDTOs);
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -136,6 +151,7 @@ public class OrderController {
         kafkaOrderProducerService.publishForOrderSubmit(
                 OrderDTO.builder()
                         .orderStatus(OrderStatus.CANCELLED)
+                        .paymentStatus(PaymentStatus.CANCELED)
                         .orderId(orderId)
                         .build()
         );

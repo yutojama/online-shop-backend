@@ -22,5 +22,6 @@ public class OrderItemDTO {
     private Size size;
     private BigDecimal unitPrice;
     private BigDecimal discountPrice;
+    private String image;
 
 }

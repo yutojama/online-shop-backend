@@ -3,12 +3,15 @@ package com.portshop.order_service.controller;
 import com.portshop.order_service.dto.*;
 import com.portshop.order_service.model.Cart;
 import com.portshop.order_service.model.CartItem;
+import com.portshop.order_service.orderEnum.Size;
 import com.portshop.order_service.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -29,7 +32,7 @@ public class CartController {
     ) {
         String kcId = authentication.getName();
         Cart cart = cartService.createCart(kcId);
-        return ResponseEntity.ok().body("Cart created successfully, cart id: "+cart.getId());
+        return ResponseEntity.ok().body("Cart id: "+cart.getId());
     }
 
     @GetMapping("/get-cart")
@@ -45,9 +48,11 @@ public class CartController {
         // create response dto
         GetCartResponseDTO getCartResponseDTO = new GetCartResponseDTO();
         List<CartItem> cartItems = cart.getCartItems();
+        cartItems.sort(Comparator.comparing(CartItem::getItemId));
         cartItems.forEach(cartItem -> {
             GetCartItemResponseDTO getCartItemResponseDTO = GetCartItemResponseDTO.builder()
                     .id(cartItem.getId().toString())
+                    .shopId(cartItem.getShopKeycloakId())
                     .quantity(cartItem.getQuantity())
                     .size(cartItem.getSize())
                     .itemId(cartItem.getItemId())
@@ -56,6 +61,8 @@ public class CartController {
                     .image(cartItem.getImage())
                     .unitPrice(cartItem.getUnitPrice())
                     .discountPrice(cartItem.getDiscountPrice())
+                    .daysOfDelivery(cartItem.getDaysOfDelivery())
+                    .available(cartItem.getAvailable())
                     .build();
             getCartResponseDTO.getCartItemResponseDTOList().add(getCartItemResponseDTO);
         });
@@ -72,8 +79,9 @@ public class CartController {
     ) {
         String kcId = authentication.getName();
         Cart cart = cartService.getCart(kcId);
+
         CartItem cartItem = CartItem.builder()
-                .shopKeycloakId(addItemRequestDTO.getShopKeycloakId())
+                .shopKeycloakId(addItemRequestDTO.getShopId())
                 .quantity(addItemRequestDTO.getQuantity())
                 .size(addItemRequestDTO.getSize())
                 .itemId(addItemRequestDTO.getItemId())
@@ -82,6 +90,8 @@ public class CartController {
                 .image(addItemRequestDTO.getImage())
                 .unitPrice(addItemRequestDTO.getUnitPrice())
                 .discountPrice(addItemRequestDTO.getDiscountPrice())
+                .daysOfDelivery(addItemRequestDTO.getDaysOfDelivery())
+                .available(addItemRequestDTO.getAvailable())
                 .build();
         Cart newCart = cartService.addItemToCart(cart, cartItem);
 
@@ -89,9 +99,32 @@ public class CartController {
         return ResponseEntity.ok().body(cartService.getCartSum(newCart));
     }
 
+    @GetMapping("/get-items")
+    public ResponseEntity<?> getCartItems(
+            Authentication authentication
+    ){
+        String kcId = authentication.getName();
+        Cart cart = cartService.getCart(kcId);
+        List<CartItem> cartItems = cart.getCartItems();
+        List<CartItemResponseDTO> cartItemResponseDTOList = new ArrayList<>();
+        cartItems.forEach(cartItem -> cartItemResponseDTOList.add(
+           CartItemResponseDTO.builder()
+                   .productId(cartItem.getProductId())
+                   .itemId(cartItem.getItemId())
+                   .productName(cartItem.getProductName())
+                   .image(cartItem.getImage())
+                   .unitPrice(cartItem.getUnitPrice())
+                   .discountPrice(cartItem.getDiscountPrice())
+                   .quantity(cartItem.getQuantity())
+                   .size(cartItem.getSize())
+                   .build()
+        ));
+        return ResponseEntity.ok().body(cartItemResponseDTOList);
+    }
+
     @DeleteMapping("/delete-item/{itemId}")
     public ResponseEntity<?> deleteItemFromCart(
-            String itemId,
+            @PathVariable String itemId,
             Authentication authentication
     ){
         String kcId = authentication.getName();

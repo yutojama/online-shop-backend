@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -35,6 +36,19 @@ public class ProductController {
     /**
      * customer & shop handling from here
      * */
+
+    @PreAuthorize("hasAnyRole('SHOP')")
+    @GetMapping("/get-prods/{shopId}")
+    public ResponseEntity<?> getProducts(
+            @PathVariable String shopId,
+            Authentication authentication
+    ){
+        String kcId = authentication.getName();
+        List<Product> products = productService.getProductsByShopId(shopId);
+        List<ProductResponseDTO> productResponseDTOList = products.stream().map(productMapper::ProductToProductResponseDTO).toList();
+        return ResponseEntity.ok().body(productResponseDTOList);
+    }
+
     // deprecated, will be deleted
     @PreAuthorize("hasAnyRole('SHOP')")
     @PostMapping("/create-prod")

@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> getProductById(UUID id);
     List<Product> findAllByOrderByCreatedAtAsc();
+
+    List<Product> getProductByShopKeycloakId(String shopKeycloakId);
 }

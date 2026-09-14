@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 public class AddItemRequestDTO {
 
     @NotNull(message = "Shop id is required for adding item")
-    private String shopKeycloakId;
+    private String shopId;
 
     @NotNull(message = "Quantity is required for adding item")
     private Integer quantity;
@@ -44,5 +44,11 @@ public class AddItemRequestDTO {
 
     @Digits(integer = 8, fraction = 2)
     private BigDecimal discountPrice;
+
+    @NotNull(message = "Days of delivery is required for adding item")
+    private Integer daysOfDelivery;
+
+    @NotNull(message = "Available quantity is required for adding item")
+    private Integer available;
 
 }

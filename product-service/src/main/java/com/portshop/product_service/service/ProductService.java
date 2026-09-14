@@ -38,6 +38,10 @@ public class ProductService {
         throw new ProductNotFoundException("Product not found with ID: " + id);
     }
 
+    public List<Product> getProductsByShopId(String shopId) {
+        return productRepository.getProductByShopKeycloakId(shopId);
+    }
+
     public List<Product> findAllByOrderByCreatedAtAsc() {
         return productRepository.findAllByOrderByCreatedAtAsc();
     }

@@ -23,14 +23,14 @@ public class PaymentController {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping("/pay/{paymentId}")
+    @PostMapping("/pay/{orderId}")
     public ResponseEntity<?> pay(
-            @PathVariable String paymentId,
+            @PathVariable String orderId,
             Authentication authentication
     ) {
         // here should be a wait time
-        paymentService.checkUserAuthentication(paymentId, authentication.getName());
-        Payment payment = paymentService.pay(paymentId);
+        paymentService.checkUserAuthentication(orderId, authentication.getName());
+        Payment payment = paymentService.pay(orderId);
         PaymentDTO paymentDTO = paymentService.getPaymentDTO(payment);
         kafkaPaymentProducerService.publishForPayment(paymentDTO);
         // publish payment successful
@@ -38,14 +38,14 @@ public class PaymentController {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping("/cancel/{paymentId}")
+    @PostMapping("/cancel/{orderId}")
     public ResponseEntity<?> cancel(
-            @PathVariable String paymentId,
+            @PathVariable String orderId,
             Authentication authentication
     ) {
         // here should be a wait time
-        paymentService.checkUserAuthentication(paymentId, authentication.getName());
-        Payment payment = paymentService.cancel(paymentId);
+        paymentService.checkUserAuthentication(orderId, authentication.getName());
+        Payment payment = paymentService.cancel(orderId);
         PaymentDTO paymentDTO = paymentService.getPaymentDTO(payment);
         kafkaPaymentProducerService.publishForPayment(paymentDTO);
         // publish payment successful
@@ -53,10 +53,10 @@ public class PaymentController {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping("/redirect/{paymentId}")
-    public ResponseEntity<?> redirect(@PathVariable String paymentId, Authentication authentication) {
-        paymentService.checkUserAuthentication(paymentId, authentication.getName());
-        paymentService.redirectToPaymentProvider(paymentId);
+    @PostMapping("/redirect/{orderId}")
+    public ResponseEntity<?> redirect(@PathVariable String orderId, Authentication authentication) {
+        paymentService.checkUserAuthentication(orderId, authentication.getName());
+        paymentService.redirectToPaymentProvider(orderId);
         return ResponseEntity.ok().build();
     }
 

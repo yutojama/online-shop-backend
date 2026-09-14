@@ -24,6 +24,7 @@ public class ProductMapper {
     public ProductResponseDTO ProductToProductResponseDTO(Product product){
         return ProductResponseDTO.builder()
                 .id(product.getId())
+                .shopId(product.getShopKeycloakId())
                 .brand(product.getBrand())
                 .category(product.getCategory().toString())
                 .gender(product.getGender().toString())

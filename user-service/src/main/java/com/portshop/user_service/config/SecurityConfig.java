@@ -33,7 +33,6 @@ public class SecurityConfig {
         /* disable all spring security setups since we use keycloak */
         http
                 .authorizeHttpRequests(auth->auth
-//                        .requestMatchers("/api/users/create").permitAll()
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
@@ -56,22 +55,45 @@ public class SecurityConfig {
     // this bean adds ROLE_ in front of all custom roles, because spring security need this prefix and otherwise invalid
     @Bean
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationTokenConverter() {
-        return jwt -> {
+        return new JwtAuthenticationTokenConverter(clientId);
+    }
+
+    static class JwtAuthenticationTokenConverter
+            implements Converter<Jwt, AbstractAuthenticationToken> {
+
+        private final String clientId;
+
+        JwtAuthenticationTokenConverter(String clientId) {
+            this.clientId = clientId;
+        }
+
+        @Override
+        public AbstractAuthenticationToken convert(Jwt jwt) {
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+
+            Map<String, Object> resourceAccess =
+                    jwt.getClaim("resource_access");
+
             if (resourceAccess != null) {
-                Map<String, Object> client =  (Map<String, Object>) resourceAccess.get(clientId);
+                Map<String, Object> client =
+                        (Map<String, Object>) resourceAccess.get(clientId);
 
                 if (client != null) {
-                    Collection<String> roles = (Collection<String>) client.get("roles");
+                    Collection<String> roles =
+                            (Collection<String>) client.get("roles");
 
                     if (roles != null) {
-                        roles.forEach(role -> grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                        roles.forEach(role ->
+                                grantedAuthorities.add(
+                                        new SimpleGrantedAuthority("ROLE_" + role)
+                                )
+                        );
                     }
                 }
             }
+
             return new JwtAuthenticationToken(jwt, grantedAuthorities);
-        };
+        }
     }
 
 }

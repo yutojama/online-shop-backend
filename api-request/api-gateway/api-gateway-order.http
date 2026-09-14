@@ -94,5 +94,8 @@ Content-Type: application/json
   }
 }
 
+### get order
+GET http://localhost:4000/api/orders/get-order
+
 ### cancel order
 DELETE http://localhost:4000/api/orders/cancel/c0912e2e-e381-4d91-bbc7-294336df0bf2

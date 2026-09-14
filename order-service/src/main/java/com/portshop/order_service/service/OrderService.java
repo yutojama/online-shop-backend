@@ -8,14 +8,12 @@ import com.portshop.order_service.dto.orderDTO.OrderShipmentDTO;
 import com.portshop.order_service.exception.OrderAuthException;
 import com.portshop.order_service.exception.OrderNotFoundException;
 import com.portshop.order_service.model.*;
-import com.portshop.order_service.orderEnum.Carrier;
-import com.portshop.order_service.orderEnum.OrderStatus;
-import com.portshop.order_service.orderEnum.PaymentMethod;
-import com.portshop.order_service.orderEnum.ShipmentStatus;
+import com.portshop.order_service.orderEnum.*;
 import com.portshop.order_service.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -175,7 +173,22 @@ public class OrderService {
                         .toStatus(OrderStatus.CONFIRMED)
                         .changedAt(Instant.now())
                         .changedBy("Payment service")
-                        .reason("Payment created")
+                        .reason("Payment successful")
+                        .build()
+        );
+        return orderRepository.save(order);
+    }
+
+    public Order paymentFailedHistory(Order order) {
+        order.setOrderStatus(OrderStatus.PENDING);
+        order.addOrderStatusHistory(
+                OrderStatusHistory.builder()
+                        .order(order)
+                        .fromStatus(OrderStatus.PENDING)
+                        .toStatus(OrderStatus.PENDING)
+                        .changedAt(Instant.now())
+                        .changedBy("Payment service")
+                        .reason("Payment failed")
                         .build()
         );
         return orderRepository.save(order);
@@ -228,6 +241,7 @@ public class OrderService {
 
     public Order cancelOrderHistory(Order order, OrderStatus fromStatus) {
         order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setPaymentStatus(PaymentStatus.CANCELED);
         order.getShipments().forEach(shipment -> {
             shipment.setShipmentStatus(ShipmentStatus.CANCELLED);
         });
@@ -254,6 +268,7 @@ public class OrderService {
                 .tax(order.getTax())
                 .shippingCost(order.getShippingCost())
                 .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
                 .carrier(order.getCarrier())
                 .billingAddress(AddressRequestDTO.builder()
                         .firstName(order.getBillingAddress().getFirstName())
@@ -293,6 +308,7 @@ public class OrderService {
                             .size(orderItem.getSize())
                             .unitPrice(orderItem.getUnitPrice())
                             .discountPrice(orderItem.getDiscountPrice())
+                            .image(orderItem.getImage())
                             .build()
                     )
             );
@@ -302,4 +318,7 @@ public class OrderService {
         return orderDTO;
     }
 
+    public List<Order> getOrdersByUserKeycloakId(String kcId) {
+        return orderRepository.getOrderByUserKeycloakId(kcId);
+    }
 }
