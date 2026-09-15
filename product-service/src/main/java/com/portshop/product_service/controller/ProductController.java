@@ -3,6 +3,7 @@ package com.portshop.product_service.controller;
 import com.portshop.product_service.dto.ProductMapper;
 import com.portshop.product_service.dto.ProductRequestDTO;
 import com.portshop.product_service.dto.ProductResponseDTO;
+import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.ProductService;
 import com.portshop.product_service.service.UserService;
@@ -131,6 +132,21 @@ public class ProductController {
             productService.createProduct(productMapper.ProductRequestDTOToProduct(prod, kcId));
         }
         return ResponseEntity.ok().body("Create successful");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/update-quantity")
+    public ResponseEntity<?> updateProductQuantity(){
+        List<Product> products = productService.findAll();
+        products.forEach(product -> {
+            product.setQuantity(
+                    product.getItems().stream()
+                            .map(Item::getQuantity)
+                            .reduce(0, Integer::sum)
+            );
+        });
+        productService.updateAll(products);
+        return ResponseEntity.ok().body("Product quantity updated successful");
     }
 
 }

@@ -29,7 +29,7 @@ public class Shipment {
     private String orderId;
 
     @Column(nullable = false)
-    private String shopKeycloakId;
+    private String shopId;
 
     @Column(nullable = false)
     private String orderShipmentId;

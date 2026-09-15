@@ -1,5 +1,5 @@
 ### Add stock
-POST http://localhost:4000/api/items/add-item?itemId=0c053650-4e93-4917-aa00-afeafbc87e75
+POST http://localhost:4000/api/items/add-item?itemId=23aa3318-1f7b-41b0-9367-df42be44763a
     &quantity=5
 
 ### Add stock
@@ -9,6 +9,9 @@ POST http://localhost:4000/api/items/add-item?itemId=8b6c153e-9403-4de8-9c3d-305
 ### Add stock
 POST http://localhost:4000/api/items/add-item?itemId=727818f0-972d-4671-a097-40ce88cedc46
     &quantity=5
+
+### Updata quantity of all products
+PATCH http://localhost:4000/api/products/update-quantity
 
 
 //  "newPath": "C:\\Softwares\\projects\\online-shop-backend\\images"

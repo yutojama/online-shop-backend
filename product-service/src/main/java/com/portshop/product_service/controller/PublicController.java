@@ -40,7 +40,7 @@ public class PublicController {
     @GetMapping("/products/get-prods")
     public ResponseEntity<?> getProducts(){
         List<ProductResponseDTO> productResponseDTOList =
-                productService.findAll().stream().map(productMapper::ProductToProductResponseDTO).toList();
+                productService.findAllByOrderByCreatedAtAsc().stream().map(productMapper::ProductToProductResponseDTO).toList();
         return ResponseEntity.ok(productResponseDTOList);
     }
 

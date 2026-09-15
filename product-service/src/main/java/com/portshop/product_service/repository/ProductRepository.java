@@ -12,4 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllByOrderByCreatedAtAsc();
 
     List<Product> getProductByShopKeycloakId(String shopKeycloakId);
+
+    List<Product> findAllByOrderByCreatedAtDesc();
 }

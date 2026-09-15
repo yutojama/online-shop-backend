@@ -17,7 +17,7 @@ import java.util.List;
 public class OrderShipmentDTO {
 
     private String shipmentId;
-    private String shopKeycloakId;
+    private String shopId;
     private Carrier carrier;
     private String trackingNumber;
     private ShipmentStatus shipmentStatus;

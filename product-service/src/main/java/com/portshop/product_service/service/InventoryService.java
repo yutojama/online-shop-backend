@@ -5,6 +5,7 @@ import com.portshop.product_service.dto.orderDTO.OrderDTO;
 import com.portshop.product_service.exception.ItemReservationException;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.ItemReservation;
+import com.portshop.product_service.model.Product;
 import com.portshop.product_service.productEnum.InventoryStatus;
 import com.portshop.product_service.repository.ItemReservationRepository;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class InventoryService {
 
     private final ItemReservationRepository itemReservationRepository;
+    private final ProductService productService;
     private final ItemService itemService;
 
-    public InventoryService(ItemReservationRepository itemReservationRepository, ItemService itemService) {
+    public InventoryService(ItemReservationRepository itemReservationRepository, ProductService productService, ItemService itemService) {
         this.itemReservationRepository = itemReservationRepository;
+        this.productService = productService;
         this.itemService = itemService;
     }
 
@@ -76,6 +79,8 @@ public class InventoryService {
             itemReservations.forEach(item -> {
                 Item getItem = itemService.getItem(UUID.fromString(item.getItemId()));
                 getItem.setQuantity(getItem.getQuantity() - item.getQuantity());
+                Product product = getItem.getProduct();
+                product.setQuantity(product.getQuantity() - item.getQuantity());
                 itemService.saveItem(getItem);
             });
         }
@@ -92,6 +97,8 @@ public class InventoryService {
             // restore stock
             Item getItem = itemService.getItem(UUID.fromString(itemReservation.getItemId()));
             getItem.setQuantity(getItem.getQuantity() + itemReservation.getQuantity());
+            Product product = getItem.getProduct();
+            product.setQuantity(product.getQuantity() + itemReservation.getQuantity());
             itemService.saveItem(getItem);
         });
         itemReservationRepository.saveAll(itemReservations);

@@ -50,6 +50,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public List<Product> findAllByOrderByCreatedAtDesc() {
+        return productRepository.findAllByOrderByCreatedAtDesc();
+    }
+
 
     /* update product */
     public Product updateProduct(Product product) {

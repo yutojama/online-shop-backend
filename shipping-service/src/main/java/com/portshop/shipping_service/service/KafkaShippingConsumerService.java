@@ -44,7 +44,7 @@ public class KafkaShippingConsumerService {
             orderDTO.getOrderShipmentDTOList().forEach(orderShipment -> {
                 Shipment shipment = Shipment.builder()
                         .orderId(orderDTO.getOrderId())
-                        .shopKeycloakId(orderShipment.getShopKeycloakId())
+                        .shopId(orderShipment.getShopId())
                         .orderShipmentId(orderShipment.getShipmentId())
                         .carrier(orderShipment.getCarrier())
                         .shipmentStatus(ShipmentStatus.PENDING)

@@ -68,7 +68,7 @@ public class OrderService {
                     order.addOrderItem(
                             OrderItem.builder()
                                     .order(order)
-                                    .shopKeycloakId(cartItem.getShopKeycloakId())
+                                    .shopId(cartItem.getShopId())
                                     .quantity(cartItem.getQuantity())
                                     .size(cartItem.getSize())
                                     .itemId(cartItem.getItemId())
@@ -90,14 +90,14 @@ public class OrderService {
             // check if shipment with shop id already exists
             Shipment existShipment = shipments.stream()
                     .filter(spm ->
-                            spm.getShopKeycloakId()
-                                    .equals(orderItem.getShopKeycloakId())
+                            spm.getShopId()
+                                    .equals(orderItem.getShopId())
                     ).findFirst()
                     .orElse(null);
 
             if(existShipment == null){
                 Shipment shipment = Shipment.builder()
-                        .shopKeycloakId(orderItem.getShopKeycloakId())
+                        .shopId(orderItem.getShopId())
                         .carrier(order.getCarrier())
                         .order(order)
                         .build();
@@ -293,7 +293,7 @@ public class OrderService {
         order.getShipments().forEach(shipment -> {
             OrderShipmentDTO orderShipmentDTO = OrderShipmentDTO.builder()
                     .shipmentId(shipment.getId().toString())
-                    .shopKeycloakId(shipment.getShopKeycloakId())
+                    .shopId(shipment.getShopId())
                     .carrier(shipment.getCarrier())
                     .trackingNumber(shipment.getTrackingNumber())
                     .shipmentStatus(shipment.getShipmentStatus())

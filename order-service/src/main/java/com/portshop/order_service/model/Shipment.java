@@ -28,7 +28,7 @@ public class Shipment {
     private UUID id;
 
     @Column(nullable = false)
-    private String shopKeycloakId;
+    private String shopId;
 
     @Column(nullable = false)
     private Carrier carrier;

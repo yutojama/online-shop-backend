@@ -52,7 +52,7 @@ public class CartController {
         cartItems.forEach(cartItem -> {
             GetCartItemResponseDTO getCartItemResponseDTO = GetCartItemResponseDTO.builder()
                     .id(cartItem.getId().toString())
-                    .shopId(cartItem.getShopKeycloakId())
+                    .shopId(cartItem.getShopId())
                     .quantity(cartItem.getQuantity())
                     .size(cartItem.getSize())
                     .itemId(cartItem.getItemId())
@@ -81,7 +81,7 @@ public class CartController {
         Cart cart = cartService.getCart(kcId);
 
         CartItem cartItem = CartItem.builder()
-                .shopKeycloakId(addItemRequestDTO.getShopId())
+                .shopId(addItemRequestDTO.getShopId())
                 .quantity(addItemRequestDTO.getQuantity())
                 .size(addItemRequestDTO.getSize())
                 .itemId(addItemRequestDTO.getItemId())

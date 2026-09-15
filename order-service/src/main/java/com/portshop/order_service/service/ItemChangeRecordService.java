@@ -22,7 +22,7 @@ public class ItemChangeRecordService {
         orderItems.forEach(orderItem -> {
             // create item change record for each order item
             ItemChangeRecord itemChangeRecord = ItemChangeRecord.builder()
-                    .shopKeycloakId(orderItem.getShopKeycloakId())
+                    .shopId(orderItem.getShopId())
                     .itemId(orderItem.getItemId())
                     .orderId(order.getId().toString())
                     .build();
