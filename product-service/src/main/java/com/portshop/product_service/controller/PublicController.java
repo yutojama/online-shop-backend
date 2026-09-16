@@ -6,13 +6,13 @@ import com.portshop.product_service.dto.ProductMapper;
 import com.portshop.product_service.dto.ProductResponseDTO;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
+import com.portshop.product_service.productEnum.Category;
+import com.portshop.product_service.productEnum.Gender;
+import com.portshop.product_service.productEnum.Size;
 import com.portshop.product_service.service.ItemService;
 import com.portshop.product_service.service.ProductService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +51,18 @@ public class PublicController {
         return ResponseEntity.ok().body(productResponseDTO);
     }
 
-
+    @GetMapping("/products/get-filter-prods")
+    public ResponseEntity<?> getFilteredProducts(
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String cat,
+            @RequestParam(required = false) String size
+    ) {
+        Gender genderEnum = gender != null ? Gender.valueOf(gender) : null;
+        Category catEnum = cat != null ? Category.valueOf(cat) : null;
+        Size sizeEnum = size != null ? Size.valueOf(size) : null;
+        List<Product> products = productService.getFilteredProducts(genderEnum,catEnum,sizeEnum);
+        return ResponseEntity.ok(products);
+    }
 
     /**
      * guest item handling from here, accessible without login possible
