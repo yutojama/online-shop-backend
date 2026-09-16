@@ -39,7 +39,7 @@ public class ProductService {
     }
 
     public List<Product> getProductsByShopId(String shopId) {
-        return productRepository.getProductByShopKeycloakId(shopId);
+        return productRepository.getProductByShopId(shopId);
     }
 
     public List<Product> findAllByOrderByCreatedAtAsc() {
@@ -78,7 +78,7 @@ public class ProductService {
     public Boolean verifyProduct(UUID userId, String kcId) {
         Optional<Product> product = productRepository.getProductById(userId);
         if(product.isPresent()) {
-            return product.get().getShopKeycloakId().equals(kcId);
+            return product.get().getShopId().equals(kcId);
         }
         throw new ProductNotFoundException("Product not found with ID: " + userId);
     }

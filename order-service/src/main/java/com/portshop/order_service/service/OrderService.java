@@ -9,6 +9,7 @@ import com.portshop.order_service.exception.OrderAuthException;
 import com.portshop.order_service.exception.OrderNotFoundException;
 import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.*;
+import com.portshop.order_service.repository.OrderItemRepository;
 import com.portshop.order_service.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,12 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
 
-    public OrderService(OrderRepository orderRepository, CartService cartService) {
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartService cartService) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
         this.cartService = cartService;
     }
 
@@ -36,6 +39,10 @@ public class OrderService {
             throw new OrderNotFoundException(orderId);
         }
         return order;
+    }
+
+    public OrderItem getOrderItem(String orderItemId) {
+        return orderItemRepository.getOrderItemByItemId(orderItemId);
     }
 
     public Order createOrderFromCart(Cart cart,

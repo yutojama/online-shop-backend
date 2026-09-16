@@ -8,7 +8,7 @@ public class ProductMapper {
 
     public Product ProductRequestDTOToProduct(ProductRequestDTO productRequestDTO, String kcId){
         return Product.builder()
-                .shopKeycloakId(kcId)
+                .shopId(kcId)
                 .brand(productRequestDTO.getBrand())
                 .category(productRequestDTO.getCategory())
                 .gender(productRequestDTO.getGender())
@@ -24,7 +24,7 @@ public class ProductMapper {
     public ProductResponseDTO ProductToProductResponseDTO(Product product){
         return ProductResponseDTO.builder()
                 .id(product.getId())
-                .shopId(product.getShopKeycloakId())
+                .shopId(product.getShopId())
                 .brand(product.getBrand())
                 .category(product.getCategory().toString())
                 .gender(product.getGender().toString())

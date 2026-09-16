@@ -7,16 +7,23 @@ Content-Type: application/json
   "password": "password"
 }
 
-### Login user
+### Login user (now shop)
 POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "jamie_lynn",
+  "username": "whitney_kunde",
   "password": "password"
 }
 
 ### Login shop
+// jamie_lynn
+// allyson_pacocha
+// alexis_pouros -> 3 items in homepage
+// don_kiehn
+// yasmine_hintz
+// gwenn_kertzmann
+###
 POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
@@ -24,6 +31,7 @@ Content-Type: application/json
   "username": "allyson_pacocha",
   "password": "password"
 }
+
 
 
 
@@ -54,7 +62,7 @@ Content-Type: application/json
 GET http://localhost:4000/admin/auth/me
 
 ### Update user role
-POST http://localhost:4000/admin/auth/fc3bffe5-f85c-4e6f-8f07-a7551a22fca5/role/CUSTOMER
+POST http://localhost:4000/admin/auth/fc3bffe5-f85c-4e6f-8f07-a7551a22fca5/role/SHOP
 
 ### Delete specific user
 DELETE http://localhost:4000/admin/auth/delete-user/1b494498-afba-4bf7-862f-5ed9729c89a0

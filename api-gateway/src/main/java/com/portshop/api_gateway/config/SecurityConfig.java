@@ -2,6 +2,7 @@ package com.portshop.api_gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -40,6 +41,20 @@ public class SecurityConfig {
                 )
                 .securityContextRepository(contextRepository)
                 .httpBasic(httpBasic->httpBasic.disable())
+
+                // Return plain 401 than WWW-Authenticate which results in basic login modal at 401
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(
+                                (exchange, exception) -> {
+                                    exchange.getResponse().setStatusCode(
+                                            HttpStatus.UNAUTHORIZED
+                                    );
+
+                                    return exchange.getResponse().setComplete();
+                                }
+                        )
+                )
+
                 .formLogin(formLogin->formLogin.disable())
 //                .cors(cors -> cors.disable())
 //                .csrf(csrf -> csrf.disable());

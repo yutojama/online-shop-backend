@@ -6,6 +6,7 @@ import com.portshop.order_service.repository.ItemChangeRecordRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -86,6 +87,11 @@ public class ItemChangeRecordService {
             );
             itemChangeRecordRepository.save(itemChangeRecord);
         });
+    }
+
+    public List<ItemChangeRecord> getItemChangeRecordByShopId(String shopId) {
+        List<ItemChangeRecord> itemChangeRecords = itemChangeRecordRepository.getItemChangeRecordByShopId(shopId);
+        return itemChangeRecords;
     }
 
 }

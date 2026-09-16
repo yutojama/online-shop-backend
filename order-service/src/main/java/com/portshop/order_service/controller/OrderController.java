@@ -4,6 +4,8 @@ import com.portshop.order_service.dto.AddressRequestDTO;
 import com.portshop.order_service.dto.OrderShippingInfoRequestDTO;
 import com.portshop.order_service.dto.orderDTO.ItemReservationDTO;
 import com.portshop.order_service.dto.orderDTO.OrderDTO;
+import com.portshop.order_service.dto.orderShopDTO.ItemChangeRecordDTO;
+import com.portshop.order_service.dto.orderShopDTO.OrderShopDTO;
 import com.portshop.order_service.exception.ItemReservationException;
 import com.portshop.order_service.model.*;
 import com.portshop.order_service.orderEnum.Carrier;
@@ -19,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,15 +32,13 @@ public class OrderController {
     private final OrderService orderService;
     private final KafkaOrderProducerService kafkaOrderProducerService;
     private final InventoryService inventoryService;
-    private final ItemChangeRecordRepository itemChangeRecordRepository;
     private final ItemChangeRecordService itemChangeRecordService;
 
-    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService, InventoryService inventoryService, ItemChangeRecordRepository itemChangeRecordRepository, ItemChangeRecordService itemChangeRecordService) {
+    public OrderController(CartService cartService, OrderService orderService, KafkaOrderProducerService kafkaOrderProducerService, InventoryService inventoryService, ItemChangeRecordService itemChangeRecordService) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.kafkaOrderProducerService = kafkaOrderProducerService;
         this.inventoryService = inventoryService;
-        this.itemChangeRecordRepository = itemChangeRecordRepository;
         this.itemChangeRecordService = itemChangeRecordService;
     }
 
@@ -53,6 +54,46 @@ public class OrderController {
         }
         List<OrderDTO> orderDTOs = orders.stream().map(orderService::getOrderDTO).toList();
         return ResponseEntity.ok(orderDTOs);
+    }
+
+    @PreAuthorize("hasRole('SHOP')")
+    @GetMapping("/shop/get-order/{shopId}")
+    public ResponseEntity<?> getShopOrder(@PathVariable String shopId) {
+        List<ItemChangeRecord> itemChangeRecords = itemChangeRecordService.getItemChangeRecordByShopId(shopId);
+        List<OrderShopDTO> orderShopDTOList = new ArrayList<>();
+        for (ItemChangeRecord itemChangeRecord : itemChangeRecords) {
+
+            // get order item
+            OrderItem orderItem = orderService.getOrderItem(itemChangeRecord.getItemId());
+
+            OrderShopDTO orderShopDTO = orderShopDTOList.stream()
+                    .filter(order->order.getOrderId().equals(itemChangeRecord.getOrderId()))
+                    .findFirst().orElse(null);
+
+            if(orderShopDTO==null){
+                orderShopDTO = OrderShopDTO.builder()
+                        .shopId(itemChangeRecord.getShopId())
+                        .orderId(itemChangeRecord.getOrderId())
+                        .build();
+                orderShopDTOList.add(
+                        orderShopDTO
+                );
+            }
+
+            ItemChangeRecordDTO itemChangeRecordDTO = ItemChangeRecordDTO.builder()
+                    .productId(orderItem.getProductId())
+                    .itemId(orderItem.getItemId())
+                    .productName(orderItem.getProductName())
+                    .quantity(orderItem.getQuantity())
+                    .size(orderItem.getSize())
+                    .image(orderItem.getImage())
+                    .build();
+            itemChangeRecordDTO.getItemHistories().addAll(itemChangeRecord.getItemHistories());
+
+            orderShopDTO.getItemChangeRecords().add(itemChangeRecordDTO);
+        }
+
+        return ResponseEntity.ok().body(orderShopDTOList);
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")

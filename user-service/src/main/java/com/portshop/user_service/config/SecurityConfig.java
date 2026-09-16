@@ -1,5 +1,6 @@
 package com.portshop.user_service.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,14 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .httpBasic(httpBasic->httpBasic.disable())
+
+                // returns plain 401 rather than basic login modal at 401
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                )
+
                 .formLogin(formLogin->formLogin.disable())
                 .cors(cors->cors.disable())
                 .csrf(csrf -> csrf.disable());
