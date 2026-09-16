@@ -3,7 +3,6 @@ package com.portshop.product_service.controller;
 import com.portshop.product_service.dto.ItemImportRequestDTO;
 import com.portshop.product_service.dto.ItemMapper;
 import com.portshop.product_service.dto.ItemRequestDTO;
-import com.portshop.product_service.dto.ItemResponseDTO;
 import com.portshop.product_service.model.Item;
 import com.portshop.product_service.model.Product;
 import com.portshop.product_service.service.InventoryService;
@@ -45,6 +44,28 @@ public class ItemController {
         Item item = itemService.getItem(UUID.fromString(itemId));
         item.setQuantity(item.getQuantity() + quantity);
         itemService.saveItem(item);
+        return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(item));
+    }
+
+    @PreAuthorize("hasRole('SHOP')")
+    @PatchMapping("/shop/add/{itemId}")
+    public ResponseEntity<?> shopAdd(@PathVariable String itemId) {
+        Item item = itemService.getItem(UUID.fromString(itemId));
+        item.setQuantity(item.getQuantity() + 1);
+        item.getProduct().setQuantity(item.getProduct().getQuantity() + 1);
+        itemService.saveItem(item);
+        return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(item));
+    }
+
+    @PreAuthorize("hasRole('SHOP')")
+    @PatchMapping("/shop/remove/{itemId}")
+    public ResponseEntity<?> shopRemove(@PathVariable String itemId) {
+        Item item = itemService.getItem(UUID.fromString(itemId));
+        if(item.getQuantity()>0){
+            item.setQuantity(item.getQuantity() - 1);
+            item.getProduct().setQuantity(item.getProduct().getQuantity() - 1);
+            itemService.saveItem(item);
+        }
         return ResponseEntity.ok().body(itemMapper.toItemResponseDTO(item));
     }
 
