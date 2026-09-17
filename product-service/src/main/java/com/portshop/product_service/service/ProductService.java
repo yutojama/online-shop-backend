@@ -7,6 +7,7 @@ import com.portshop.product_service.productEnum.Category;
 import com.portshop.product_service.productEnum.Gender;
 import com.portshop.product_service.productEnum.Size;
 import com.portshop.product_service.repository.ProductRepository;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +112,56 @@ public class ProductService {
         });
     }
 
+    public List<Product> getSearchedProducts(String keyword) {
+        Specification<Product> spec = searchProducts(keyword);
+        return productRepository.findAll(spec);
+    }
+
+    public Specification<Product> searchProducts(String keyword) {
+        return (root, query, cb) -> {
+
+            if (keyword == null || keyword.trim().isEmpty()) {
+                return cb.conjunction();
+            }
+
+            String search = keyword.toLowerCase().trim();
+
+            Expression<String> name = cb.lower(root.get("description"));
+
+            // Fuzzy word similarity
+            Expression<Double> similarity = cb.function(
+                    "word_similarity",
+                    Double.class,
+                    cb.literal(search),
+                    name
+            );
+
+            // Normal partial match
+            Predicate partialMatch = cb.like(
+                    name,
+                    "%" + search + "%"
+            );
+
+            // Fuzzy match
+            Predicate fuzzyMatch = cb.greaterThan(
+                    similarity,
+                    0.3
+            );
+
+            // Match either partial OR fuzzy
+            Predicate searchMatch = cb.or(
+                    partialMatch,
+                    fuzzyMatch
+            );
+
+            // Rank by similarity
+            query.orderBy(
+                    cb.desc(similarity)
+            );
+
+            return searchMatch;
+        };
+    }
 
     /* update product */
     public Product updateProduct(Product product) {

@@ -66,6 +66,12 @@ public class PublicController {
         return ResponseEntity.ok(products);
     }
 
+    @GetMapping("/products/search/{keyword}")
+    public ResponseEntity<?> searchProducts(@PathVariable String keyword){
+        List<Product> products = productService.getSearchedProducts(keyword);
+        return ResponseEntity.ok(products);
+    }
+
     /**
      * guest item handling from here, accessible without login possible
      * */
