@@ -54,6 +54,8 @@ public class Product {
 
     private Integer discountPrice;
 
+    private Integer realPrice;
+
     @Column(nullable = false)
     private String image;
 

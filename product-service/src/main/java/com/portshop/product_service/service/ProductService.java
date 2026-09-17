@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,12 +61,24 @@ public class ProductService {
         return productRepository.findAllByOrderByCreatedAtDesc();
     }
 
-    public List<Product> getFilteredProducts(Gender gender, Category cat, Size size) {
-        Specification<Product> spec = filterProducts(gender,cat,size);
+    public List<Product> getFilteredProducts(
+            Gender gender,
+            Category cat,
+            Size size,
+            Integer minPrice,
+            Integer maxPrice
+    ) {
+        Specification<Product> spec = filterProducts(gender,cat,size,minPrice,maxPrice);
         return productRepository.findAll(spec);
     }
 
-    public Specification<Product> filterProducts(Gender gender, Category cat, Size size) {
+    public Specification<Product> filterProducts(
+            Gender gender,
+            Category cat,
+            Size size,
+            Integer minPrice,
+            Integer maxPrice
+    ) {
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (gender != null) {
@@ -76,6 +89,23 @@ public class ProductService {
             }
             if (size != null) {
                 predicates.add(criteriaBuilder.equal(root.get("size"), size));
+            }
+            if (minPrice != null) {
+                predicates.add(
+                        criteriaBuilder.greaterThanOrEqualTo(
+                                root.get("realPrice"),
+                                minPrice
+                        )
+                );
+            }
+
+            if (maxPrice != null) {
+                predicates.add(
+                        criteriaBuilder.lessThanOrEqualTo(
+                                root.get("realPrice"),
+                                maxPrice
+                        )
+                );
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });

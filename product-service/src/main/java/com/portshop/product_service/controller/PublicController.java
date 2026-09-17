@@ -55,12 +55,14 @@ public class PublicController {
     public ResponseEntity<?> getFilteredProducts(
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String cat,
-            @RequestParam(required = false) String size
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice
     ) {
         Gender genderEnum = gender != null ? Gender.valueOf(gender) : null;
         Category catEnum = cat != null ? Category.valueOf(cat) : null;
         Size sizeEnum = size != null ? Size.valueOf(size) : null;
-        List<Product> products = productService.getFilteredProducts(genderEnum,catEnum,sizeEnum);
+        List<Product> products = productService.getFilteredProducts(genderEnum,catEnum,sizeEnum,minPrice,maxPrice);
         return ResponseEntity.ok(products);
     }
 
