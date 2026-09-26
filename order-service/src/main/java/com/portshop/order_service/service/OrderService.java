@@ -14,7 +14,6 @@ import com.portshop.order_service.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -117,7 +116,7 @@ public class OrderService {
 
         // set shipment id for orderItems
         Order newOrder = orderRepository.save(order);
-        order.getShipments().forEach(shipment -> {
+        newOrder.getShipments().forEach(shipment -> {
             shipment.getOrderItems().forEach(orderItem -> {
                 orderItem.setShipment(shipment);
             });

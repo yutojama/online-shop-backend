@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -183,6 +182,10 @@ public class ProductService {
 
     }
 
+    /*
+    *   function to be fixed:
+    *   shopId is not equal to keycloakId
+    *  */
     public Boolean verifyProduct(UUID userId, String kcId) {
         Optional<Product> product = productRepository.getProductById(userId);
         if(product.isPresent()) {

@@ -65,6 +65,7 @@ public class Product {
             orphanRemoval = true
     )
     @JsonManagedReference
+    @Builder.Default
     private List<Item> items = new ArrayList<>();
 
     @CreationTimestamp

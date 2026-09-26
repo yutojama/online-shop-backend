@@ -55,7 +55,7 @@ public class PublicController {
     public ResponseEntity<?> getFilteredProducts(
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String cat,
-            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String size, // not yet implemented
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice
     ) {

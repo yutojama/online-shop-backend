@@ -31,6 +31,7 @@ public class Cart {
             orphanRemoval = true
     )
     @JsonManagedReference
+    @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
     public void addCartItem(CartItem cartItem) {
