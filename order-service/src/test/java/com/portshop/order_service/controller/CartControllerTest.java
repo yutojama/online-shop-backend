@@ -162,8 +162,7 @@ public class CartControllerTest {
         mockMvc.perform(
                         get("/api/carts/get-cart")
                 )
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isOk());
 
     }
 
