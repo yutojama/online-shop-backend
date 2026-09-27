@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="KEYCLOAK_CLIENT_SECRET" value="fMBKIo1lQVsIgVW0Ln8evxFgU7fGZhbEjTsuUzjDdTegbtrS1ze2U269BCA0W50D7WtXGTteID0BuokhlWFZ12" />
+      <env name="KEYCLOAK_REALM" value="portshop-realm" />
+      <env name="KEYCLOAK_SERVER_URL" value="http://localhost:8081" />
+      <env name="ORDER_SERVICE_URL" value="http://localhost:4003" />
+      <env name="PAYMENT_SERVICE_URL" value="http://localhost:4004" />
+      <env name="PRODUCT_SERVICE_URL" value="http://localhost:4001" />
+      <env name="SHIPPING_SERVICE_URL" value="http://localhost:4005" />
+      <env name="SPRING_R2DBC_PASSWORD" value="password" />
+      <env name="SPRING_R2DBC_URL" value="r2dbc:postgresql://localhost:5003/db" />
+      <env name="SPRING_R2DBC_USERNAME" value="admin_user" />
+      <env name="SPRING_SQL_INIT_MODE" value="always" />
+      <env name="USER_SERVICE_URL" value="http://localhost:4002" />
+    </envs>
+    <module name="api-gateway" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.api_gateway.ApiGatewayApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

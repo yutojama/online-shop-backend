@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ShippingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5005/db" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />
+      <env name="SPRING_JPA_HIBERNATE_DDL_AUTO" value="create" />
+      <env name="SPRING_SQL_INIT_MODE" value="never" />
+    </envs>
+    <module name="shipping-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.shipping_service.ShippingServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

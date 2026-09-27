@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="UserServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="KEYCLOAK_CLIENT_SECRET" value="fMBKIo1lQVsIgVW0Ln8evxFgU7fGZhbEjTsuUzjDdTegbtrS1ze2U269BCA0W50D7WtXGTteID0BuokhlWFZ12" />
+      <env name="KEYCLOAK_REALM" value="portshop-realm" />
+      <env name="KEYCLOAK_SERVER_URL" value="http://localhost:8081" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5002/db" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />
+      <env name="SPRING_JPA_HIBERNATE_DDL_AUTO" value="update" />
+      <env name="SPRING_SQL_INIT_MODE" value="never" />
+    </envs>
+    <module name="user-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.user_service.UserServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

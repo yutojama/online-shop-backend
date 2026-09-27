@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PaymentServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5006/db" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />
+      <env name="SPRING_JPA_HIBERNATE_DDL_AUTO" value="create" />
+      <env name="SPRING_SQL_INIT_MODE" value="never" />
+    </envs>
+    <module name="payment-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.payment_service.PaymentServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

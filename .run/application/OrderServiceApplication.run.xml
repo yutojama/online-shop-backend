@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="OrderServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="PRODUCT_SERVICE_URL" value="http://localhost:4001" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5004/db" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />
+      <env name="SPRING_JPA_HIBERNATE_DDL_AUTO" value="create" />
+      <env name="SPRING_SQL_INIT_MODE" value="never" />
+      <env name="USER_SERVICE_URL" value="http://localhost:4002" />
+    </envs>
+    <module name="order-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.order_service.OrderServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ProductServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="FRONTEND_URL" value="http://localhost:5173" />
+      <env name="IMAGE_URI" value="C:\Softwares\projects\online-shop-backend\images" />
+      <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5000/db" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />
+      <env name="SPRING_JPA_HIBERNATE_DDL_AUTO" value="update" />
+      <env name="SPRING_SQL_INIT_MODE" value="always" />
+      <env name="USER_SERVICE_URL" value="http://localhost:4002" />
+    </envs>
+    <module name="product-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.portshop.product_service.ProductServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
