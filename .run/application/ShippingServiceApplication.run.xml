@@ -1,7 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ShippingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <envs>
+      <env name="KAFKA_SERVICE_URL" value="localhost:9092" />
       <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
+      <env name="KEYCLOAK_REALM" value="portshop-realm" />
+      <env name="KEYCLOAK_SERVER_URL" value="http://localhost:8081" />
       <env name="SPRING_DATASOURCE_PASSWORD" value="password" />
       <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://localhost:5005/db" />
       <env name="SPRING_DATASOURCE_USERNAME" value="admin_user" />

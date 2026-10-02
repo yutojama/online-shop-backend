@@ -69,6 +69,8 @@ app:
     url: ${PAYMENT_SERVICE_URL}
   shipping-service:
     url: ${SHIPPING_SERVICE_URL}
+  frontend:
+    url: ${FRONTEND_CORS_URL}
 
 keycloak:
   token-url: ${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token

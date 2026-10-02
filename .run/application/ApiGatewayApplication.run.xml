@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <envs>
+      <env name="FRONTEND_CORS_URL" value="http://localhost:5173" />
       <env name="KEYCLOAK_CLIENT_ID" value="portshop-admin" />
       <env name="KEYCLOAK_CLIENT_SECRET" value="fMBKIo1lQVsIgVW0Ln8evxFgU7fGZhbEjTsuUzjDdTegbtrS1ze2U269BCA0W50D7WtXGTteID0BuokhlWFZ12" />
       <env name="KEYCLOAK_REALM" value="portshop-realm" />

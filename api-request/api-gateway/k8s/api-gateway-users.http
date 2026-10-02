@@ -1,0 +1,98 @@
+### Login admin
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### Login user (now shop)
+#POST http://localhost:4000/api/auth/login
+POST http://localhost:8080/be/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "whitney_kunde",
+  "password": "password"
+}
+
+### Logout user
+POST http://localhost:61614/be/api/auth/logout
+
+### Login shop
+// jamie_lynn
+// allyson_pacocha
+// alexis_pouros -> 3 items in homepage
+// don_kiehn
+// yasmine_hintz
+// gwenn_kertzmann
+###
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "allyson_pacocha",
+  "password": "password"
+}
+
+
+
+
+### Get me
+GET http://localhost:4000/api/users/get-me
+
+
+### Logout user
+POST http://localhost:4000/api/auth/logout
+
+
+### Register/add user
+POST http://localhost:4000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "jamie_lynn@yahoo.com",
+  "password": "password",
+  "firstName": "Jamie",
+  "lastName": "Lynn",
+  "phone": "0157595248586"
+}
+
+
+
+
+### Test get me: only with admin role possible
+GET http://localhost:4000/admin/auth/me
+
+### Update user role
+POST http://localhost:4000/admin/auth/fc3bffe5-f85c-4e6f-8f07-a7551a22fca5/role/SHOP
+
+### Delete specific user
+DELETE http://localhost:4000/admin/auth/delete-user/1b494498-afba-4bf7-862f-5ed9729c89a0
+
+### Get users by role
+GET http://localhost:4000/api/users/get-user/by-role/SHOP
+
+
+
+
+// auth repository handling
+### clear auth session
+DELETE http://localhost:4000/admin/auth/clear-auth-session
+
+
+
+
+// user data handling
+### Generate user data
+POST http://localhost:4000/admin/auth/generate/user-data?shop=5&cost=10
+
+### Reset all user data
+DELETE http://localhost:4000/admin/auth/reset-all
+
+### Generate address data
+POST http://localhost:4000/admin/users/generate/address-data
+
+### Delete address data
+DELETE http://localhost:4000/admin/users/delete/address-data
