@@ -1,0 +1,14 @@
+### Login user (now shop)
+POST https://f6d1c334.cloudfront.localhost.localstack.cloud/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "whitney_kunde",
+  "password": "password"
+}
+
+### Get me
+GET https://f6d1c334.cloudfront.localhost.localstack.cloud/api/users/get-me
+
+### Logout user
+POST https://f6d1c334.cloudfront.localhost.localstack.cloud/api/auth/logout
