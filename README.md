@@ -253,6 +253,7 @@ For aws deployment, examples should look like: http://demo-service.dns-namespace
 | Variable Name                   | Description                                 | Data Type | Required | Example                                        |
 |---------------------------------|---------------------------------------------|-----------|----------|------------------------------------------------|
 | `KEYCLOAK_CLIENT_ID`            | Access client for login with password grant | String    | Yes      | `portshop-admin`                               |
+| `IMAGE_URI`                     | URI for product images                      | String    | Yes      | `/app/images`                                  |
 | `KEYCLOAK_REALM`                | Get/Refresh JWT access token                | String    | Yes      | `portshop-realm`                               |
 | `KEYCLOAK_SERVER_URL`           | Get/Refresh JWT access token                | String    | Yes      | `http://portshop-keycloak:8080`                |
 | `SPRING_DATASOURCE_USERNAME`    | Username for postgres database              | String    | Yes      | `admin_user`                                   |
@@ -261,6 +262,11 @@ For aws deployment, examples should look like: http://demo-service.dns-namespace
 | `SPRING_SQL_INIT_MODE`          | If or not trigger resource/schema.sql       | String    | Yes      | `never`                                        |
 | `SPRING_JPA_HIBERNATE_DDL_AUTO` | create/update/none                          | String    | Yes      | `create`                                       |
 | `USER_SERVICE_URL`              | Get shop role for data generation           | String    | Yes      | `http://user-service:4002`                     |
+
+Image URI varies between deployments. 
+For local debugging, it could be local path or resource service.
+For kubernetes, it could be mounted file system or resource service.
+For aws, s3 bucket is recommended. Besides, the image controller needs to be changed for aws version. Since now there is no aws profile configured, a manual change in image controller is required.
 
 ### Environment Variables — [Shipping Service]
 
