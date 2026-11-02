@@ -1,6 +1,19 @@
 spring:
   application:
     name: order-service
+  config:
+    import: vault://
+  cloud:
+    vault:
+      host: ${VAULT_HOST}
+      port: 8200
+      scheme: http
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: kv
+        default-context: order-service
   security:
     oauth2:
       resourceserver:

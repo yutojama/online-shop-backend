@@ -1,6 +1,8 @@
 spring:
   application:
     name: api-gateway
+  config:
+    import: vault://
   cloud:
     gateway:
       server:
@@ -47,6 +49,17 @@ spring:
 #                - Path=/api/shipping/**
 #              filters:
 #                - JwtValidation
+
+    vault:
+      host: ${VAULT_HOST}
+      port: 8200
+      scheme: http
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: kv
+        default-context: api-gateway
 
 
   security:

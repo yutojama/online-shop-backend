@@ -1,6 +1,19 @@
 spring:
   application:
     name: product-service
+  config:
+    import: vault://
+  cloud:
+    vault:
+      host: ${VAULT_HOST}
+      port: 8200
+      scheme: http
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: kv
+        default-context: product-service
   security:
     oauth2:
       resourceserver:
