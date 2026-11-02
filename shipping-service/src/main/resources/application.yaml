@@ -29,3 +29,10 @@ spring:
 
 server:
   port: 4005
+
+app:
+  kafka:
+    topic:
+      shipping:
+        partitions: ${KAFKA_SHIPPING_PARTITIONS}
+        replicas: ${KAFKA_SHIPPING_REPLICAS}

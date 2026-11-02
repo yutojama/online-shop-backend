@@ -27,3 +27,10 @@ spring:
 
 server:
   port: 4004
+
+app:
+  kafka:
+    topic:
+      payment:
+        partitions: ${KAFKA_PAYMENT_PARTITIONS}
+        replicas: ${KAFKA_PAYMENT_REPLICAS}

@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ProductServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ACTIVE_PROFILES" value="dev" />
     <envs>
       <env name="FRONTEND_URL" value="http://localhost:5173" />
       <env name="IMAGE_URI" value="C:\Softwares\projects\online-shop-backend\images" />

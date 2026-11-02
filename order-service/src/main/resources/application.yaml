@@ -36,3 +36,8 @@ app:
     url: ${USER_SERVICE_URL}
   product-service:
     url: ${PRODUCT_SERVICE_URL}
+  kafka:
+    topic:
+      order:
+        partitions: ${KAFKA_ORDER_PARTITIONS}
+        replicas: ${KAFKA_ORDER_REPLICAS}
