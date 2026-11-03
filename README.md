@@ -171,6 +171,7 @@ flowchart TD
 - **API Documentation:** Swagger -- will be implemented soon
 - **Authorization & Authentication:** Keycloak
 - **Event Streaming:** Apache Kafka
+- **Secrets Manager:** HashiCorp Vault
 
 ## Repository Structure
 
@@ -193,8 +194,7 @@ flowchart TD
 
 Configure each microservice using its application configuration files or environment variables. The port of each microservice has been hardcoded. It could be turned into environmental variables if required.
 
-Do not commit passwords, API keys, tokens, or other secrets to the repository. All credentials in the repository is only for reference
-There is still no secrets manager deployed in this project, which will be implemented soon.
+Do not commit passwords, API keys, tokens, or other secrets to the repository.
 
 The URLs are written in docker internal network style. 
 For local debugging, examples should look like: http://localhost:4000
@@ -322,8 +322,6 @@ For aws, s3 bucket is recommended. Besides, the image controller needs to be cha
 | `KAFKA_NODE_ID`                                | specifies the unique numeric identifier for a Kafka server                                               | String    | Yes      | `1`                                                  |
 | `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR`       | specifies how many copies of Kafka's internal consumer-offsets topic should be maintained across brokers | String    | Yes      | `1`                                                  |
 | `KAFKA_PROCESS_ROLES`                          | defines which role or roles a Kafka node performs in a KRaft cluster                                     | String    | Yes      | `broker,controller`                                  |
-
-At present, the kafka topics are created by each microservices. Replica and partition numbers are hardcoded inside the config files. They will be forwarded to environment variables soon.
 
 ## Getting Started
 
